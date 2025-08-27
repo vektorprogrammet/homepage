@@ -8,13 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TabsContent } from "@/components/ui/tabs";
 import { Tabs } from "@radix-ui/react-tabs";
 import { useEffect, useRef, useState } from "react";
@@ -47,17 +41,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
  
-const studyValues = [
-  "Annet", "BBI", "BDIGSEC", "BELDIG", "BFY", "BGEOL", "BIAIS", "BIBYGG", 
-  "BIDATA", "BIELEKTRO", "BIFOREN", "BIHAV", "BIMASKIN", "BIT", "BKJ", 
-  "BMAT", "BØA", "BSØK", "FTFORKURS", "FTHINGKJ", "FTHINGLOG", "FTHINGMAT", 
-  "FTREALFAG", "ITBAITBEDR", "MAAR", "MBIOT5", "MLREAL", "MSIT", "MSIVØK5", 
-  "MSØK/5", "MTBYGG", "MTDESIG", "MTDT", "MTELSYS", "MTENERG", "MTFYMA", 
-  "MTGEORT", "MTING", "MTINGGEO", "MTIØT", "MTKJ", "MTKOM", "MTMART", 
-  "MTMASKIN", "MTMT", "MTNANO", "MTTK", "ÅBIKJ", "ÅØKADM", "ÅSØK"
-];
+import { studyOptions } from "~/lib/studies";
 
-const studies = studyValues.map(value => ({ value, label: value }));
+const studies = studyOptions.map(value => ({ value, label: value }));
 
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
@@ -207,7 +193,6 @@ export default function Assistenter() {
 
       <div className="mb-16 h-full s:w-[100%] md:w-[75%]" ref={cardElement}>
         {" "}
-        {/* ikke helt dynamisk høyde her */}
         <CityTabs />
       </div>
       <div className="mb-16 font-bold text-vektor-DARKblue">
@@ -235,38 +220,19 @@ function CityTabs() {
   useEffect(() => {
     sessionStorage.setItem("kontaktTab", active);
   }, [active]);
-
-  /* return (
-    <div>
-      <main className="flex w-4/5 flex-col items-center rounded-md sm:w-[440px] md:w-[720px] lg:w-[820px] xl:w-[1100px]">
-        <div className="w-full">
-          {<CityApplyCard city={active} />}
-        </div>
-      </main>
-      <div className="ml-3 w-1/5">
-        <TabMenu
-          tabs={["Trondheim", "Bergen", "Ås"]}
-          activeTab={active}
-          setActiveTab={setActive}
-        />
-      </div>
-    </div>
-  ); */
    return (
       <div
         className="sm:w-[100%] sm:min-w-[300px] md:w-auto items-center justify-center"
-        /* className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row" */
         role="tablist"
       >
-        <div className="md:absolute s:left-0 md:left-3 lg:left-12">
-          <TabMenu
+        <div className="md:absolute md:left-10">
+          <TabMenu className="w-full md:w-auto"
               tabs={["Trondheim", "Bergen", "Ås"]}
               activeTab={active}
               setActiveTab={setActive}
           />
         </div>
-        {/* <div className="flex w-1 items-center"> */}
-        <div className="flex max-w-[800px] w-[70%] items-center justify-center mx-auto">
+        <div className="flex max-w-[800px] w-[100%] md:w-[70%] items-center justify-center mx-auto">
           {<CityApplyCard city={active} />}
         </div>
       </div>
@@ -285,7 +251,6 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             <CardDescription className=" flex text-white items-center justify-center">Søknadsfrist: ???</CardDescription>
           </CardHeader>
           <CardContent className=" space-y-3  text-white">
-          {/* <CardContent className="min-w-[300px] md:w-[60%] md:min-w-[400px] lg:min-w-[700px] space-y-3"> */}
             <div className="flex flex-col md:flex-row md:space-x-4 w-full">
               <div className="space-y-1 w-full md:w-1/2">
                 <Label htmlFor="fornavn">Fornavn</Label>
@@ -308,7 +273,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             </div>
             <div className="flex flex-col md:flex-row md:space-x-4 w-full">
               <div className="space-y-1 w-full md:w-1/2">
-                <Label htmlFor="fornavn">Fornavn</Label>
+                <Label htmlFor="fornavn">Studieretning</Label>
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -391,7 +356,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end text-white">
-            <Button variant="green" className="w-[155px]">Søk nå!</Button>
+            <Button variant="green" className="w-[100%] md:w-[48%] lg:w-[22.5%]">Søk nå!</Button>
           </CardFooter>
         </Card>
       </TabsContent>
@@ -403,13 +368,11 @@ function NoApplyCard({ cities }: { cities: CityPretty }) {
   return (
     <form>
       <h1 className="my-8 font-bold text-vektor-darblue text-xl"> {cities}</h1>
-
       <div className="mt-3 block">
         <Input className="form-input inline-flex items-center border-2 border-grey border-solid">
           E-post
         </Input>
       </div>
-
       <div className="block">
         <div className="mt-2">
           <div className="inline-flex items-center text-left">
@@ -425,11 +388,9 @@ function NoApplyCard({ cities }: { cities: CityPretty }) {
           </div>
         </div>
       </div>
-
       <div className="flex ">
         <div className="flex items-center" />
       </div>
-
       <button
         type="submit"
         className="m-8 rounded border border-blue-700 bg-vektor-darkblue px-4 py-2 font-bold text-white hover:bg-vektor-blue"
