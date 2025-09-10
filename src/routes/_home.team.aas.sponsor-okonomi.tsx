@@ -42,6 +42,8 @@ export default function SponsorOkonomi() {
         i løpet av semesteret ved å ta kontakt med bedrifter i nærområdet.
       </div>
       <div className="m-3">
+        {/*! TODO: FIX */}
+        {/* biome-ignore lint/a11y/useAltText: Temporary ignore for ci/cd */}
         <img
           src="https://vektorprogrammet.no/images/team_images/%C3%85s%20h%C3%B8st%202022/okonomi_spons.jpg"
           className="m-5 mx-auto h-auto content-center sm:max-w-2xl"

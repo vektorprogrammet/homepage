@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-
 import "~/index.css";
+import icon from "/images/vektor-logo-circle.svg";
+import logo from "/images/vektor-logo.svg";
 
 export function Layout({
   children,
@@ -12,13 +13,13 @@ export function Layout({
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
-        <link rel="icon" href="/images/vektor-logo-circle.svg" />
+        <link rel="icon" href={icon} />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="theme-color" content="#E2F4FA" />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://vektorprogrammet.no/" />
-        <meta property="og:image" content="/images/vektor-logo.png" />
+        <meta property="og:image" content={logo} />
         <meta
           property="og:description"
           content="Vektorprogrammet er Norges største organisasjon som jobber for å øke interessen for matematikk og realfag blant elever i grunnskolen. Vi sender realfagssterke studenter til barne- og ungdomsskoler hvor de fungerer som lærerens assistent."
@@ -31,7 +32,7 @@ export function Layout({
         />
 
         <link rel="manifest" href="/manifest.json" />
-        <title>Vektorprogrammet</title>
+        <title>{"Vektorprogrammet"}</title>
         <Meta />
         <Links />
       </head>

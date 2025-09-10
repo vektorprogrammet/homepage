@@ -1,7 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
-import CountUp from "react-countup";
+import { useInView, useMotionValue, useSpring } from "motion/react";
+import { useEffect, useRef } from "react";
 import { Link, type To, href } from "react-router";
-import VisibilitySensor from "react-visibility-sensor";
 import { Button } from "~/components/ui/button";
 import Abelprisen from "/images/mainPage/sponsor/Abelprisen.png";
 import ksBergen from "/images/mainPage/sponsor/KSBergen.png";
@@ -114,15 +114,15 @@ export default function mainPage() {
         </div>
         <div className="w-full p-6 text-center md:mt-24 md:mr-auto md:w-1/2 md:p-10 md:text-left">
           <h1 className="mb-4 hidden font-bold text-4xl md:block dark:text-text-dark">
-            Vektorprogrammet
+            {"Vektorprogrammet"}
           </h1>
           <div className="mt-6 mb-4 flex justify-center md:block">
             <p className="text-left text-md md:w-4/5 md:text-xl dark:text-text-dark">
-              - sender studenter til ungdomsskoler for å hjelpe til som lærerens
-              assistent i matematikkundervisningen
+              {`- sender studenter til ungdomsskoler for å hjelpe til som lærerens
+              assistent i matematikkundervisningen`}
             </p>
           </div>
-          <Button variant="green">Les mer og bli assistent</Button>
+          <Button variant="green">{"Les mer og bli assistent"}</Button>
         </div>
       </div>
       {/*Upper end*/}
@@ -134,17 +134,9 @@ export default function mainPage() {
             className="flex max-w-96 flex-col gap-5 text-vektor-bg"
           >
             <div>
-              <VisibilitySensor partialVisibility>
-                {({ isVisible }: { isVisible: boolean }) => (
-                  <div className="font-bold text-4xl">
-                    {isVisible ? (
-                      <CountUp end={number} duration={4} separator="" />
-                    ) : (
-                      0
-                    )}
-                  </div>
-                )}
-              </VisibilitySensor>
+              <div className="font-bold text-4xl">
+                <MotionCounter value={number} />
+              </div>
               <p className="text-xl md:text-2xl">{title}</p>
             </div>
             <p className="max-w-80 text-sm md:max-w-96 md:text-xl">{text}</p>
@@ -195,4 +187,43 @@ export default function mainPage() {
       </div>
     </main>
   );
+}
+
+// * Inspired by https://github.com/driaug/animated-counter under the Unlicense
+function MotionCounter({
+  value,
+  direction = "up",
+  className,
+}: {
+  value: number;
+  direction?: "up" | "down";
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionValue = useMotionValue(direction === "down" ? value : 0);
+  const springValue = useSpring(motionValue, {
+    damping: 80,
+    stiffness: 100,
+  });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    if (isInView) {
+      motionValue.set(direction === "down" ? 0 : value);
+    }
+  }, [motionValue, isInView, value, direction]);
+
+  useEffect(
+    () =>
+      springValue.on("change", (latest) => {
+        if (ref.current) {
+          ref.current.textContent = Intl.NumberFormat("nb-NO").format(
+            Number(latest.toFixed(0)),
+          );
+        }
+      }),
+    [springValue],
+  );
+
+  return <span className={className} ref={ref} />;
 }

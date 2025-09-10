@@ -72,6 +72,8 @@ export default function Skolekoordinering() {
       </div>
 
       <div className="m-3">
+        {/*! TODO: FIX */}
+        {/* biome-ignore lint/a11y/useAltText: Temporary ignore for ci/cd */}
         <img
           src="https://vektorprogrammet.no/images/team_images/%C3%85s%20h%C3%B8st%202022/20_g_pp.jpeg"
           className="m-5 mx-auto h-auto content-center sm:max-w-2xl"

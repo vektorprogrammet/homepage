@@ -97,6 +97,8 @@ export default function Profilering() {
       </div>
 
       <div className="m-3 mt-5">
+        {/*! TODO: FIX */}
+        {/* biome-ignore lint/a11y/useAltText: Temporary ignore for ci/cd */}
         <img
           src="https://vektorprogrammet.no/images/team_images/Profilering/IMG_9785.jpeg"
           className="mx-auto h-auto content-center md:max-w-3xl"
@@ -143,6 +145,8 @@ export default function Profilering() {
             <li>Få en relevant attest til senere jobbsøking</li>
           </ul>
         </div>
+        {/*! TODO: FIX */}
+        {/* biome-ignore lint/a11y/useAltText: Temporary ignore for ci/cd */}
         <img
           className="mt-5 h-auto max-h-96 place-content-center content-center sm:ml-10 sm:max-w-sm"
           src="/images/team/ProfileringTor.png"

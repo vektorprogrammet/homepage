@@ -21,7 +21,7 @@ export function TeamTemplate({
         {name}
       </h1>
       <div className="mt-5 text-center font-bold text-base text-vektor-darblue">
-        Epost:{" "}
+        {"Epost: "}
         <a
           className="overflow-hidden break-all font-normal text-base hover:underline"
           href={`mailto:${mail}`}

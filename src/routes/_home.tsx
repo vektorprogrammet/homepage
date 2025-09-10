@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SiFacebook } from "@icons-pack/react-simple-icons";
 import { FolderOpen, Mail, MapPin } from "lucide-react";
-import { useRef, useState } from "react";
-import { Link, NavLink, Outlet, type To, useLocation } from "react-router";
+import { motion } from "motion/react";
+import { Link, NavLink, Outlet, type To } from "react-router";
 import { type Sponsor, getSponsors } from "~/api/sponsor";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
@@ -32,16 +32,14 @@ export default function Layout() {
 function AppHeader() {
   return (
     <div className="sticky top-2 z-50">
-      <div className="hidden w-full justify-center md:flex lg:px-4">
+      <div className="flex w-full flex-wrap justify-center lg:px-4">
         <div className="mr-12 flex w-fit items-center gap-1 rounded-full bg-[#ccecf6] bg-opacity-40 px-1.5 shadow-md backdrop-blur dark:bg-black dark:bg-opacity-40">
-          <div className="h-8 w-8">
-            <div className="w-full rounded-full">
-              <img
-                src="/images/vektor-logo-circle.svg"
-                alt="vektorprogrammet logo"
-              />
-            </div>
-          </div>
+          <img
+            src="/images/vektor-logo-circle.svg"
+            alt="vektorprogrammet logo"
+            width={32}
+            height={32}
+          />
           <NavTabs routes={navRoutes} />
         </div>
       </div>
@@ -58,45 +56,34 @@ function NavTabs({
 }: {
   routes: Array<{ name: string; path: To }>;
 }) {
-  const location = useLocation();
-  const navLinkRefs = useRef<Array<HTMLElement>>([]); // Refs to the nav links
-  const [pillWidth, setPillWidth] = useState<number>();
-  const [pillLeft, setPillLeft] = useState<number>();
-
-  const activeNavIndex = routes.findIndex(
-    (route) => route.path === location.pathname,
-  );
-
   return (
     <div className="flew-row relative mx-auto flex h-11 rounded-full px-0.5">
-      <span
-        className="absolute top-0 bottom-0 z-10 flex overflow-hidden rounded-full py-1.5 transition-all duration-300"
-        style={{ left: pillLeft, width: pillWidth }}
-      >
-        <span className="h-full w-full rounded-full bg-vektor-blue shadow-sm" />
-      </span>
-      {routes.map((route, i) => {
+      {routes.map((route) => {
         return (
           <NavLink
             to={route.path}
             key={route.path.toString()}
-            ref={(el) => {
-              if (!el) return;
-
-              // Add the ref to the array
-              navLinkRefs.current[i] = el;
-              // If the current link is the active one, set the pill width and left offset
-              if (i === activeNavIndex) {
-                setPillWidth(el.offsetWidth);
-                setPillLeft(el.offsetLeft);
-              }
-            }}
             className={({ isActive }) =>
-              `${isActive ? "text-black" : "text-neutral-700 hover:text-black dark:text-vektor-blue dark:hover:text-vektor-bg"} z-20 my-auto cursor-pointer select-none rounded-full px-4 text-center font-medium text-sm`
+              `${isActive ? "text-black" : "text-neutral-700 hover:text-black"} relative my-1.5 place-content-center px-4 py-auto text-center font-medium text-sm`
             }
             prefetch="intent"
           >
-            {route.name}
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.div
+                    layoutId="active"
+                    className="absolute inset-0 rounded-full bg-vektor-blue mix-blend-multiply shadow-sm"
+                    transition={{
+                      type: "spring",
+                      bounce: 0.1,
+                      duration: 0.6,
+                    }}
+                  />
+                )}
+                {route.name}
+              </>
+            )}
           </NavLink>
         );
       })}
