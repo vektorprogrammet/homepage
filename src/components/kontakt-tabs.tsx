@@ -71,15 +71,13 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           <div className="text-base">{description}</div>
           <div className="mt-3 flex items-center gap-1 md:mt-8">
             <Mail className="h-5 w-5 text-black" />
-            <div className="block truncate text-sm">{email}</div>
             <Button
               onClick={async () => {
                 await navigator.clipboard.writeText(email);
               }}
-              className="bg-vektor-darkblue hover:bg-vektor-blue"
-              size="sm"
+              variant="link"
             >
-              Kopier
+              {email}
             </Button>
           </div>
           {address && (
@@ -109,14 +107,18 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
                 <div className="text-blue-800 dark:text-gray-200">
                   {contact.name}
                 </div>
-                {contact.title && <span>{contact.title}</span>}
-                {/* ENDRE HER */}
-                <a
-                  className="block truncate text-sm hover:underline"
-                  href={`mailto:${contact.mail}`}
-                >
-                  {contact.mail}
-                </a>
+                <div className="mt-3 flex items-center gap-1 md:mt-8">
+                  {contact.title && <span>{contact.title}</span>}
+                  <button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(contact.mail);
+                    }}
+                    className="hover:underline"
+                    type="button"
+                  >
+                    {contact.mail}
+                  </button>
+                </div>
               </div>
             );
           })}
