@@ -7,7 +7,7 @@ import { cities } from "~/lib/types";
 export default function ForSkoler() {
   return (
     <main>
-      <div className="mx-5 mt-10 flex flex-col items-center justify-center gap-3 font-sans leading-relaxed md:gap-5 dark:text-text-dark">
+      <div className="mx-5 mt-20 flex flex-col items-center justify-center gap-3 font-sans leading-relaxed md:gap-5 dark:text-text-dark">
         <div className="flex flex-col gap-3 md:gap-5">
           <h1 className="max-w-3xl text-center font-bold text-2xl text-vektor-DARKblue md:text-4xl dark:text-text-dark">
             {"Vektorassistenter i skolen"}

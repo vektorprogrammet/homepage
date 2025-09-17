@@ -32,7 +32,7 @@ export default function Layout() {
 function AppHeader() {
   return (
     <div className="sticky top-2 z-50">
-      <div className="flex w-full flex-wrap justify-center lg:px-4">
+      <div className="hidden md:flex w-full flex-wrap justify-center lg:px-4">
         <div className="mr-12 flex w-fit items-center gap-1 rounded-full bg-[#ccecf6] bg-opacity-40 px-1.5 shadow-md backdrop-blur dark:bg-black dark:bg-opacity-40">
           <img
             src="/images/vektor-logo-circle.svg"
