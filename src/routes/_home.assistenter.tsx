@@ -17,16 +17,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TabsContent } from "@/components/ui/tabs";
 import { Tabs } from "@radix-ui/react-tabs";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { getAssistenter } from "~/api/assistenter";
-import { TabMenu } from "~/components/tab-menu";
 import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
+import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import type { CityPretty } from "~/lib/types";
-"use client"
- 
+import { type CityPretty, cities } from "~/lib/types";
  
 import {
   Command,
@@ -221,7 +219,7 @@ export default function Assistenter() {
       </div>
       <div className="mb-16 h-full s:w-[100%] md:w-[75%]" ref={cardElement}>
         {" "}
-        <CityTabs />
+        <CityTabs city="Trondheim"/>
       </div>
       <Divider />
 
@@ -249,48 +247,33 @@ export default function Assistenter() {
     </div>
   );
 }
-function CityTabs() {
-  const initialTabState = () => {
-    const storedTab = sessionStorage.getItem("kontaktTab");
-    if (!storedTab) {
-      return "Trondheim";
-    }
-    if (!["Trondheim", "Bergen", "Ås"].includes(storedTab)) {
-      return "Trondheim";
-    }
-    // Checks ensure that storedTab is a valid DepartmentPretty
-    return storedTab as CityPretty;
-  };
+function CityTabs({ city }: { city: CityPretty }) {
+  const [active, setActive] = useState<CityPretty>(city);
 
-  const [active, setActive] = useState<CityPretty>(initialTabState);
-
-  useEffect(() => {
-    sessionStorage.setItem("kontaktTab", active);
-  }, [active]);
-   return (
-      <div
-        className="sm:w-[100%] sm:min-w-[300px] md:w-auto items-center justify-center"
-        role="tablist"
-      >
-        <div className="md:absolute md:left-10">
-          <TabMenu className="w-full md:w-auto"
-              tabs={["Trondheim", "Bergen", "Ås"]}
-              activeTab={active}
-              setActiveTab={setActive}
-          />
-        </div>
-        <div className="flex max-w-[800px] w-[100%] md:w-[70%] items-center justify-center mx-auto">
-          {<CityApplyCard city={active} />}
-        </div>
+  return (
+    <div
+      className="sm:w-[100%] sm:min-w-[300px] md:w-auto items-center justify-center"
+      role="tablist"
+    >
+    <div className="md:absolute md:left-10">
+      <TabMenu className="w-full md:w-auto"
+          tabs={Object.values(cities)}
+          activeTab={active}
+          setActiveTab={setActive}
+        />
       </div>
-    );
+      <div className="flex max-w-[800px] w-[100%] md:w-[70%] items-center justify-center mx-auto">
+        {<CityApplyCard city={active} />}
+      </div>
+    </div>
+  );
 }
 
 function CityApplyCard({ city }: { city: CityPretty }) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
   return (
-    <Tabs value={city} className="min-w-[300px] md:w-[90%] space-y-">
+    <Tabs value={city} className="w-[300px] md:w-[90%] space-y-">
       <TabsContent value={city} key={city} className="">
         <Card className="bg-vektor-darkblue">
           <CardHeader className=" text-white">

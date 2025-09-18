@@ -1,9 +1,9 @@
 export const cities = {
-  bergen: "Bergen",
   trondheim: "Trondheim",
+  bergen: "Bergen",
   aas: "Ås",
 } as const;
-type City = keyof typeof cities;
+export type City = keyof typeof cities;
 export type CityPretty = (typeof cities)[City];
 
 export const departments = {
