@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TabsContent } from "@/components/ui/tabs";
 import { Tabs } from "@radix-ui/react-tabs";
 import { useRef, useState } from "react";
@@ -25,7 +31,7 @@ import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { type CityPretty, cities } from "~/lib/types";
- 
+
 import {
   Command,
   CommandEmpty,
@@ -35,22 +41,20 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
- 
 import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
- 
+
 import { cn } from "@/lib/utils";
- 
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
- 
+
 import { studyOptions } from "~/lib/studies";
 
-const studies = studyOptions.map(value => ({ value, label: value }));
-
+const studies = studyOptions.map((value) => ({ value, label: value }));
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Assistenter() {
@@ -219,7 +223,7 @@ export default function Assistenter() {
       </div>
       <div className="mb-16 h-full s:w-[100%] md:w-[75%]" ref={cardElement}>
         {" "}
-        <CityTabs city="Trondheim"/>
+        <CityTabs city="Trondheim" />
       </div>
       <Divider />
 
@@ -252,17 +256,18 @@ function CityTabs({ city }: { city: CityPretty }) {
 
   return (
     <div
-      className="sm:w-[100%] sm:min-w-[300px] md:w-auto items-center justify-center"
+      className="items-center justify-center sm:w-[100%] sm:min-w-[300px] md:w-auto"
       role="tablist"
     >
-    <div className="md:absolute md:left-10">
-      <TabMenu className="w-full md:w-auto"
+      <div className="md:absolute md:left-10">
+        <TabMenu
+          className="w-full md:w-auto"
           tabs={Object.values(cities)}
           activeTab={active}
           setActiveTab={setActive}
         />
       </div>
-      <div className="flex max-w-[800px] w-[100%] md:w-[70%] items-center justify-center mx-auto">
+      <div className="mx-auto flex w-[100%] max-w-[800px] items-center justify-center md:w-[70%]">
         {<CityApplyCard city={active} />}
       </div>
     </div>
@@ -270,91 +275,117 @@ function CityTabs({ city }: { city: CityPretty }) {
 }
 
 function CityApplyCard({ city }: { city: CityPretty }) {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
   return (
-    <Tabs value={city} className="w-[300px] md:w-[90%] space-y-">
+    <Tabs value={city} className="space-y- w-[300px] md:w-[90%]">
       <TabsContent value={city} key={city} className="">
         <Card className="bg-vektor-darkblue">
           <CardHeader className=" text-white">
-            <CardTitle className="flex items-center justify-center">{city}</CardTitle>
-            <CardDescription className=" flex text-white items-center justify-center">Søknadsfrist: ???</CardDescription>
+            <CardTitle className="flex items-center justify-center">
+              {city}
+            </CardTitle>
+            <CardDescription className=" flex items-center justify-center text-white">
+              Søknadsfrist: ???
+            </CardDescription>
           </CardHeader>
-          <CardContent className=" space-y-3  text-white">
-            <div className="flex flex-col md:flex-row md:space-x-4 w-full">
-              <div className="space-y-1 w-full md:w-1/2">
+          <CardContent className=" space-y-3 text-white">
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="fornavn">Fornavn</Label>
                 <Input className="text-black" id="fornavn" placeholder="Ola" />
               </div>
-              <div className="space-y-1 w-full md:w-1/2">
+              <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="etternavn">Etternavn</Label>
-                <Input id="etternavn" className="text-black"  placeholder="Nordmann" />
+                <Input
+                  id="etternavn"
+                  className="text-black"
+                  placeholder="Nordmann"
+                />
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:space-x-4 w-full">
-              <div className="space-y-1 w-full md:w-1/2">
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="email">E-post</Label>
-                <Input id="email" placeholder="Skriv inn epost" className="text-black" />
+                <Input
+                  id="email"
+                  placeholder="Skriv inn epost"
+                  className="text-black"
+                />
               </div>
-              <div className="space-y-1 w-full md:w-1/2">
+              <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="phone">Telefonnummer</Label>
-                <Input id="phone" placeholder="Skriv inn telefonnummer" className="text-black" />
+                <Input
+                  id="phone"
+                  placeholder="Skriv inn telefonnummer"
+                  className="text-black"
+                />
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:space-x-4 w-full">
-              <div className="space-y-1 w-full md:w-1/2">
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="fornavn">Studieretning</Label>
                 <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full text-left text-black border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        {value
-                          ? studies.find((studies) => studies.value === value)?.label
-                          : "Velg studieretning"}
-                        <ChevronsUpDown className="opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full">
-                      <Command>
-                        <CommandInput placeholder="Finn studiekode" className="" />
-                        <CommandList>
-                          <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
-                          <CommandGroup>
-                            {studies.map((studies) => (
-                              <CommandItem
-                                key={studies.value}
-                                value={studies.value}
-                                onSelect={(currentValue) => {
-                                  setValue(currentValue === value ? "" : currentValue)
-                                  setOpen(false)
-                                }}
-                              >
-                                {studies.label}
-                                <Check
-                                  className={cn(
-                                    
-                                    value === studies.value ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {value
+                        ? studies.find((studies) => studies.value === value)
+                            ?.label
+                        : "Velg studieretning"}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full">
+                    <Command>
+                      <CommandInput
+                        placeholder="Finn studiekode"
+                        className=""
+                      />
+                      <CommandList>
+                        <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
+                        <CommandGroup>
+                          {studies.map((studies) => (
+                            <CommandItem
+                              key={studies.value}
+                              value={studies.value}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  currentValue === value ? "" : currentValue,
+                                );
+                                setOpen(false);
+                              }}
+                            >
+                              {studies.label}
+                              <Check
+                                className={cn(
+                                  value === studies.value
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div className="space-y-1 w-full md:w-1/2">
-                <div className="flex flex-col md:flex-row md:space-x-4 w-full">
-                  <div className="space-y-1 w-full md:w-1/2">
+              <div className="w-full space-y-1 md:w-1/2">
+                <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                  <div className="w-full space-y-1 md:w-1/2">
                     <Label htmlFor="gender">Kjønn</Label>
-                    <Select >
+                    <Select>
                       <SelectTrigger className="w-full text-black">
-                        <SelectValue className="w-full" placeholder="Velg kjønn" />
+                        <SelectValue
+                          className="w-full"
+                          placeholder="Velg kjønn"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="male">Mann</SelectItem>
@@ -363,7 +394,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1 w-full md:w-1/2">
+                  <div className="w-full space-y-1 md:w-1/2">
                     <Label htmlFor="grade">Årstrinn</Label>
                     <Select>
                       <SelectTrigger className="w-full text-black">
@@ -386,7 +417,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end text-white">
-            <Button variant="green" className="w-[100%] md:w-[48%] lg:w-[22.5%]">Søk nå!</Button>
+            <Button
+              variant="green"
+              className="w-[100%] md:w-[48%] lg:w-[22.5%]"
+            >
+              Søk nå!
+            </Button>
           </CardFooter>
         </Card>
       </TabsContent>

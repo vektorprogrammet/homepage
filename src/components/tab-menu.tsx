@@ -15,7 +15,7 @@ export function TabMenu<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
-  className
+  className,
 }: {
   tabs: Array<T>;
   activeTab: T;
@@ -29,8 +29,11 @@ export function TabMenu<T extends string>({
     return (
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild className="relative mb-4 flex flex-row">
-          <Button 
-            className={cn("flex h-8 w-36 cursor-default items-center justify-between rounded-md bg-vektor-darkblue px-2 text-white", className)}
+          <Button
+            className={cn(
+              "flex h-8 w-36 cursor-default items-center justify-between rounded-md bg-vektor-darkblue px-2 text-white",
+              className,
+            )}
             onClick={() => setIsOpen(!isOpen)}
             type="button"
           >
