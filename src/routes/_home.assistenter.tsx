@@ -42,7 +42,6 @@ import {
 } from "@/components/ui/command";
 
 import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -52,6 +51,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import React from "react";
 import { studyOptions } from "~/lib/studies";
 
 const studies = studyOptions.map((value) => ({ value, label: value }));
