@@ -9,15 +9,18 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { cn } from "~/lib/utils";
 
 export function TabMenu<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
+  className,
 }: {
   tabs: Array<T>;
   activeTab: T;
   setActiveTab: (tab: T) => void;
+  className?: string;
 }) {
   const isSmallScreen = useMediaQuery("(max-width: 860px)");
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +30,10 @@ export function TabMenu<T extends string>({
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild className="relative mb-4 flex flex-row">
           <Button
-            className="flex h-8 w-36 cursor-default items-center justify-between rounded-md bg-vektor-darkblue px-2 text-white"
+            className={cn(
+              "flex h-8 w-36 cursor-default items-center justify-between rounded-md bg-vektor-darkblue px-2 text-white",
+              className,
+            )}
             onClick={() => setIsOpen(!isOpen)}
             type="button"
           >

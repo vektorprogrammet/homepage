@@ -21,15 +21,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import React, { useRef, useState } from "react";
+import { TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@radix-ui/react-tabs";
+import { useRef, useState } from "react";
 import { getAssistenter } from "~/api/assistenter";
 import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
+import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import type { CityPretty } from "~/lib/types";
-import { cities } from "~/lib/types";
+import { type CityPretty, cities } from "~/lib/types";
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+
+import { Check, ChevronsUpDown } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import React from "react";
+import { studyOptions } from "~/lib/studies";
+
+const studies = studyOptions.map((value) => ({ value, label: value }));
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Assistenter() {
@@ -196,9 +221,9 @@ export default function Assistenter() {
       <div className="mt-16 mb-8 font-bold text-3xl text-vektor-DARKblue dark:text-text-dark">
         {"Søk nå!"}
       </div>
-      <div className="mb-16 h-full" ref={cardElement}>
-        {/* ikke helt dynamisk høyde her */}
-        <Citycard />
+      <div className="mb-16 h-full s:w-[100%] md:w-[75%]" ref={cardElement}>
+        {" "}
+        <CityTabs city="Trondheim" />
       </div>
       <Divider />
 
@@ -226,118 +251,180 @@ export default function Assistenter() {
     </div>
   );
 }
+function CityTabs({ city }: { city: CityPretty }) {
+  const [active, setActive] = useState<CityPretty>(city);
 
-function Citycard() {
-  const [_openTab, _setOpenTab] = useState<CityPretty>("Trondheim");
-  const [_position, _setPosition] = React.useState("bottom");
-
-  //! TODO: Remove this component when the form is done
-  // biome-ignore lint/correctness/noUnusedVariables: Tempoarily ignore for ci/cd
-  function Tab({
-    city,
-    onTabClick,
-    open,
-  }: {
-    onTabClick: () => void;
-    city: CityPretty;
-    open: boolean;
-  }) {
-    const chosenStyle = open
-      ? "tab-active dark:text-vektor-darblue"
-      : "text-vektor-darblue dark:text-gray-300";
-    return (
-      <button
-        type="button"
-        className={`tab tab-lifted w-1/3 border-white font-bold text-base dark:hover:bg-neutral-700 ${chosenStyle}`}
-        onClick={onTabClick}
-        data-toggle="tab"
-      >
-        {city}
-      </button>
-    );
-  }
   return (
-    <Tabs
-      defaultValue={Object.values(cities)[0]}
-      className="h-full sm:w-[200px] lg:w-[600px]"
+    <div
+      className="items-center justify-center sm:w-[100%] sm:min-w-[300px] md:w-auto"
+      role="tablist"
     >
-      <TabsList className={"grid w-full grid-cols-3"}>
-        {/* Eventuelt dynamisk antall kolonner med ${Object.keys(Cities).length}` */}
-        {Object.values(cities).map((city) => (
-          <TabsTrigger className="w-full" key={city} value={city}>
-            {city}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-      {Object.values(cities).map((city) => (
-        <TabsContent value={city} key={city}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{city}</CardTitle>
-              <CardDescription>{"Søknadsfrist: ???"}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="fornavn">{"Fornavn"}</Label>
-                <Input id="fornavn" defaultValue="Ola" />
+      <div className="md:absolute md:left-10">
+        <TabMenu
+          className="w-full md:w-auto"
+          tabs={Object.values(cities)}
+          activeTab={active}
+          setActiveTab={setActive}
+        />
+      </div>
+      <div className="mx-auto flex w-[100%] max-w-[800px] items-center justify-center md:w-[70%]">
+        {<CityApplyCard city={active} />}
+      </div>
+    </div>
+  );
+}
+
+function CityApplyCard({ city }: { city: CityPretty }) {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
+  return (
+    <Tabs value={city} className="space-y- w-[300px] md:w-[90%]">
+      <TabsContent value={city} key={city} className="">
+        <Card className="bg-vektor-darkblue">
+          <CardHeader className=" text-white">
+            <CardTitle className="flex items-center justify-center">
+              {city}
+            </CardTitle>
+            <CardDescription className=" flex items-center justify-center text-white">
+              Søknadsfrist: ???
+            </CardDescription>
+          </CardHeader>
+          <CardContent className=" space-y-3 text-white">
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
+                <Label htmlFor="fornavn">Fornavn</Label>
+                <Input className="text-black" id="fornavn" placeholder="Ola" />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="etternavn">{"Etternavn"}</Label>
-                <Input id="etternavn" defaultValue="Nordmann" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="email">{"E-post"}</Label>
-                <Input id="email" defaultValue="Skriv inn epost" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="phone">{"Telefonnummer"}</Label>
-                <Input id="phone" defaultValue="Skriv inn telefonnummer" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="study">{"Studieretning"}</Label>
+              <div className="w-full space-y-1 md:w-1/2">
+                <Label htmlFor="etternavn">Etternavn</Label>
                 <Input
-                  id="study"
-                  defaultValue="Bruk forkortelsen, f.eks. MTDT"
+                  id="etternavn"
+                  className="text-black"
+                  placeholder="Nordmann"
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="gender">{"Kjønn"}</Label>
-                <Select>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue className="w-full" placeholder="Velg kjønn" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">{"Mann"}</SelectItem>
-                    <SelectItem value="female">{"Kvinne"}</SelectItem>
-                    <SelectItem value="other">{"Annet"}</SelectItem>
-                  </SelectContent>
-                </Select>
+            </div>
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
+                <Label htmlFor="email">E-post</Label>
+                <Input
+                  id="email"
+                  placeholder="Skriv inn epost"
+                  className="text-black"
+                />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="grade">{"Årstrinn"}</Label>
-                <Select>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue
-                      className="w-full"
-                      placeholder="Velg årstrinn"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="firstGrade">{"1. klasse"}</SelectItem>
-                    <SelectItem value="secondGrade">{"2. klasse"}</SelectItem>
-                    <SelectItem value="thirdGrade">{"3. klasse"}</SelectItem>
-                    <SelectItem value="fourthGrade">{"4. klasse"}</SelectItem>
-                    <SelectItem value="fifthGrade">{"5. klasse"}</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="w-full space-y-1 md:w-1/2">
+                <Label htmlFor="phone">Telefonnummer</Label>
+                <Input
+                  id="phone"
+                  placeholder="Skriv inn telefonnummer"
+                  className="text-black"
+                />
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-[150px]">{"Søk nå!"}</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      ))}
+            </div>
+            <div className="flex w-full flex-col md:flex-row md:space-x-4">
+              <div className="w-full space-y-1 md:w-1/2">
+                <Label htmlFor="fornavn">Studieretning</Label>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      aria-expanded={open}
+                      className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {value
+                        ? studies.find((studies) => studies.value === value)
+                            ?.label
+                        : "Velg studieretning"}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full">
+                    <Command>
+                      <CommandInput
+                        placeholder="Finn studiekode"
+                        className=""
+                      />
+                      <CommandList>
+                        <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
+                        <CommandGroup>
+                          {studies.map((studies) => (
+                            <CommandItem
+                              key={studies.value}
+                              value={studies.value}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  currentValue === value ? "" : currentValue,
+                                );
+                                setOpen(false);
+                              }}
+                            >
+                              {studies.label}
+                              <Check
+                                className={cn(
+                                  value === studies.value
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-full space-y-1 md:w-1/2">
+                <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="gender">Kjønn</Label>
+                    <Select>
+                      <SelectTrigger className="w-full text-black">
+                        <SelectValue
+                          className="w-full"
+                          placeholder="Velg kjønn"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Mann</SelectItem>
+                        <SelectItem value="female">Kvinne</SelectItem>
+                        <SelectItem value="other">Annet</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="grade">Årstrinn</Label>
+                    <Select>
+                      <SelectTrigger className="w-full text-black">
+                        <SelectValue
+                          className="w-full text-black"
+                          placeholder="Velg årstrinn"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="firstGrade">1. klasse</SelectItem>
+                        <SelectItem value="secondGrade">2. klasse</SelectItem>
+                        <SelectItem value="thirdGrade">3. klasse</SelectItem>
+                        <SelectItem value="fourthGrade">4. klasse</SelectItem>
+                        <SelectItem value="fifthGrade">5. klasse</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end text-white">
+            <Button
+              variant="green"
+              className="w-[100%] md:w-[48%] lg:w-[22.5%]"
+            >
+              Søk nå!
+            </Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
     </Tabs>
   );
 }
@@ -348,13 +435,11 @@ function NoApplyCard({ cities }: { cities: CityPretty }) {
   return (
     <form>
       <h1 className="my-8 font-bold text-vektor-darblue text-xl"> {cities}</h1>
-
       <div className="mt-3 block">
         <Input className="form-input inline-flex items-center border-2 border-grey border-solid">
           {"E-post"}
         </Input>
       </div>
-
       <div className="block">
         <div className="mt-2">
           <div className="inline-flex items-center text-left">
@@ -370,11 +455,9 @@ function NoApplyCard({ cities }: { cities: CityPretty }) {
           </div>
         </div>
       </div>
-
       <div className="flex ">
         <div className="flex items-center" />
       </div>
-
       <button
         type="submit"
         className="m-8 rounded border border-blue-700 bg-vektor-darkblue px-4 py-2 font-bold text-white hover:bg-vektor-blue"
