@@ -329,7 +329,6 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      role="combobox"
                       aria-expanded={open}
                       className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
