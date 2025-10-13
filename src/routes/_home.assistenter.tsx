@@ -299,11 +299,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   placeholder="Ola"
                   maxLength={100}
                   onChange={(e) => {
-                    const value = e.target.value.replace(
-                      /[^a-zA-ZæøåÆØÅ\s]/g,
+                    const cleanedValue = e.target.value.replace(
+                      /[^a-zA-ZæøåÆØÅ\s-]/g,
                       "",
                     );
-                    e.target.value = value;
+                    e.target.value = cleanedValue;
                   }}
                 />
               </div>
@@ -315,11 +315,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   placeholder="Nordmann"
                   maxLength={100}
                   onChange={(e) => {
-                    const value = e.target.value.replace(
+                    const cleanedValue = e.target.value.replace(
                       /[^a-zA-ZæøåÆØÅ\s-]/g,
                       "",
                     );
-                    e.target.value = value;
+                    e.target.value = cleanedValue;
                   }}
                 />
               </div>
@@ -332,6 +332,13 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   placeholder="Skriv inn epost"
                   className="text-black"
                   maxLength={100}
+                  onChange={(e) => {
+                    const cleanedValue = e.target.value.replace(
+                      /[^a-zA-Z0-9@._-]/g, // allows letters, numbers, @, dot, underscore, and dash
+                      "",
+                    );
+                    e.target.value = cleanedValue;
+                  }}
                 />
               </div>
               <div className="w-full space-y-1 md:w-1/2">
@@ -340,10 +347,10 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   id="phone"
                   placeholder="Skriv inn telefonnummer"
                   className="text-black"
-                  maxLength={11}
+                  maxLength={8}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^+0-9]/g, "");
-                    e.target.value = value;
+                    const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+                    e.target.value = cleanedValue;
                   }}
                 />
               </div>
