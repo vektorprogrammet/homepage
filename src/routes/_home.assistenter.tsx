@@ -293,7 +293,19 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             <div className="flex w-full flex-col md:flex-row md:space-x-4">
               <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="fornavn">Fornavn</Label>
-                <Input className="text-black" id="fornavn" placeholder="Ola" />
+                <Input
+                  className="text-black"
+                  id="fornavn"
+                  placeholder="Ola"
+                  maxLength={100}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(
+                      /[^a-zA-ZæøåÆØÅ\s]/g,
+                      "",
+                    );
+                    e.target.value = value;
+                  }}
+                />
               </div>
               <div className="w-full space-y-1 md:w-1/2">
                 <Label htmlFor="etternavn">Etternavn</Label>
@@ -301,6 +313,14 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   id="etternavn"
                   className="text-black"
                   placeholder="Nordmann"
+                  maxLength={100}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(
+                      /[^a-zA-ZæøåÆØÅ\s-]/g,
+                      "",
+                    );
+                    e.target.value = value;
+                  }}
                 />
               </div>
             </div>
@@ -311,6 +331,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   id="email"
                   placeholder="Skriv inn epost"
                   className="text-black"
+                  maxLength={100}
                 />
               </div>
               <div className="w-full space-y-1 md:w-1/2">
@@ -319,6 +340,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   id="phone"
                   placeholder="Skriv inn telefonnummer"
                   className="text-black"
+                  maxLength={11}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^+0-9]/g, "");
+                    e.target.value = value;
+                  }}
                 />
               </div>
             </div>
