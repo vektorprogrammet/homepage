@@ -29,7 +29,6 @@ import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import { type CityPretty, cities } from "~/lib/types";
 
 import {
@@ -298,13 +297,13 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             <CardTitle className="flex items-center justify-center">
               {city}
             </CardTitle>
-            <CardDescription className=" flex items-center justify-center text-white">
-              {/* Replace ??? with a real deadline when connecting to database */}
-              Søknadsfrist: ???
-            </CardDescription>
           </CardHeader>
           {openNow ? ( /* CardContent when the application period for the current city is closed */
             <>
+            <CardDescription className="mb-5 flex items-center justify-center text-white text-lg md:text-xl">
+              {/* Replace ??? with a real deadline when connecting to database */}
+              Søknadsfrist: ???
+            </CardDescription>
             <CardContent className=" space-y-3 text-white">
               <div className="flex w-full flex-col md:flex-row md:space-x-4">
                 <div className="w-full space-y-1 md:w-1/2">
@@ -475,64 +474,14 @@ function CityApplyCard({ city }: { city: CityPretty }) {
             </>
           ) : (
             /* CardContent when the application period for the current city is closed */
-            <CardContent className="text-white max-w-[50%] items-center justify-center">
-                <Label htmlFor="email">E-post</Label>
-                <Input
-                    id="email"
-                    placeholder="Skriv inn epost"
-                    className="text-black"
-                    maxLength={100}
-                    onChange={(e) => {
-                      const cleanedValue = e.target.value.replace(
-                        /[^a-zA-Z0-9@._-]/g, // allows letters, numbers, @, dot, underscore, and dash
-                        "",
-                      );
-                      e.target.value = cleanedValue;
-                    }}
-                /> 
+            <CardContent className="text-white w-full mb-5">
+              <p className="mx-auto sm:w-9/10 md:w-4/5 text-center text-lg md:text-xl">
+                Søknadsperioden for {city} er dessverre stengt for semesteret. Vennligst kom tilbake senere for oppdateringer om fremtidige søknadsperioder.
+              </p>
             </CardContent>
           )}
         </Card>
       </TabsContent>
     </Tabs>
-  );
-}
-
-//! TODO: Remove this component when the form is done
-// biome-ignore lint/correctness/noUnusedVariables: Tempoarily ignore for ci/cd
-function NoApplyCard({ cities }: { cities: CityPretty }) {
-  return (
-    <form>
-      <h1 className="my-8 font-bold text-vektor-darblue text-xl"> {cities}</h1>
-      <div className="mt-3 block">
-        <Input className="form-input inline-flex items-center border-2 border-grey border-solid">
-          {"E-post"}
-        </Input>
-      </div>
-      <div className="block">
-        <div className="mt-2">
-          <div className="inline-flex items-center text-left">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="reminder" />
-              <label
-                htmlFor="reminder"
-                className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {"Få påminnelse når opptaket starter"}
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex ">
-        <div className="flex items-center" />
-      </div>
-      <button
-        type="submit"
-        className="m-8 rounded border border-blue-700 bg-vektor-darkblue px-4 py-2 font-bold text-white hover:bg-vektor-blue"
-      >
-        {"Send"}
-      </button>
-    </form>
   );
 }
