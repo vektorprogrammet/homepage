@@ -29,7 +29,7 @@ import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { type CityPretty, cities } from "~/lib/types";
+import { type City, type CityPretty, cities } from "~/lib/types";
 
 import {
   Command,
@@ -56,13 +56,20 @@ import { studyOptions } from "~/lib/studies";
 const studies = studyOptions.map((value) => ({ value, label: value }));
 
 /* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
-const cityApplicationOpen: Record<CityPretty, boolean> = {
-  Trondheim: true,
-  Bergen: false,
-  Ås: false,
+const cityApplicationOpen: Record<City, boolean> = {
+  trondheim: true,
+  bergen: false,
+  aas: false,
 };
 
-const isApplicationOpen = (city: CityPretty) => cityApplicationOpen[city] ?? false;
+/* Should be updated when cityApplicationOpen is changed. */
+const isApplicationOpen = (cityPretty: CityPretty) => {
+  // convert pretty label back to the City key
+  const cityKey = (Object.keys(cities) as Array<City>).find(
+    (key) => cities[key] === cityPretty,
+  );
+  return cityKey ? cityApplicationOpen[cityKey] : false;
+};
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Assistenter() {
@@ -289,7 +296,6 @@ function CityApplyCard({ city }: { city: CityPretty }) {
   const openNow = isApplicationOpen(city);
 
   return (
-    
     <Tabs value={city} className="space-y- w-[300px] md:w-[90%]">
       <TabsContent value={city} key={city} className="">
         <Card className="bg-vektor-darkblue">
@@ -298,185 +304,202 @@ function CityApplyCard({ city }: { city: CityPretty }) {
               {city}
             </CardTitle>
           </CardHeader>
-          {openNow ? ( /* CardContent when the application period for the current city is closed */
+          {openNow /* CardContent when the application period for the current city is closed */ ? (
             <>
-            <CardDescription className="mb-5 flex items-center justify-center text-white text-lg md:text-xl">
-              {/* Replace ??? with a real deadline when connecting to database */}
-              Søknadsfrist: ???
-            </CardDescription>
-            <CardContent className=" space-y-3 text-white">
-              <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                <div className="w-full space-y-1 md:w-1/2">
-                  <Label htmlFor="fornavn">Fornavn</Label>
-                  <Input
-                    className="text-black"
-                    id="fornavn"
-                    placeholder="Ola"
-                    maxLength={100}
-                    onChange={(e) => {
-                      const cleanedValue = e.target.value.replace(
-                        /[^a-zA-ZæøåÆØÅ\s-]/g,
-                        "",
-                      );
-                      e.target.value = cleanedValue;
-                    }}
-                  />
+              <CardDescription className="mb-5 flex items-center justify-center text-lg text-white md:text-xl">
+                {/* Replace ??? with a real deadline when connecting to database */}
+                Søknadsfrist: ???
+              </CardDescription>
+              <CardContent className=" space-y-3 text-white">
+                <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="fornavn">Fornavn</Label>
+                    <Input
+                      className="text-black"
+                      id="fornavn"
+                      placeholder="Ola"
+                      maxLength={100}
+                      onChange={(e) => {
+                        const cleanedValue = e.target.value.replace(
+                          /[^a-zA-ZæøåÆØÅ\s-]/g,
+                          "",
+                        );
+                        e.target.value = cleanedValue;
+                      }}
+                    />
+                  </div>
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="etternavn">Etternavn</Label>
+                    <Input
+                      id="etternavn"
+                      className="text-black"
+                      placeholder="Nordmann"
+                      maxLength={100}
+                      onChange={(e) => {
+                        const cleanedValue = e.target.value.replace(
+                          /[^a-zA-ZæøåÆØÅ\s-]/g,
+                          "",
+                        );
+                        e.target.value = cleanedValue;
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full space-y-1 md:w-1/2">
-                  <Label htmlFor="etternavn">Etternavn</Label>
-                  <Input
-                    id="etternavn"
-                    className="text-black"
-                    placeholder="Nordmann"
-                    maxLength={100}
-                    onChange={(e) => {
-                      const cleanedValue = e.target.value.replace(
-                        /[^a-zA-ZæøåÆØÅ\s-]/g,
-                        "",
-                      );
-                      e.target.value = cleanedValue;
-                    }}
-                  />
+                <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="email">E-post</Label>
+                    <Input
+                      id="email"
+                      placeholder="Skriv inn epost"
+                      className="text-black"
+                      maxLength={100}
+                      onChange={(e) => {
+                        const cleanedValue = e.target.value.replace(
+                          /[^a-zA-Z0-9@._-]/g, // allows letters, numbers, @, dot, underscore, and dash
+                          "",
+                        );
+                        e.target.value = cleanedValue;
+                      }}
+                    />
+                  </div>
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="phone">Telefonnummer</Label>
+                    <Input
+                      id="phone"
+                      placeholder="Skriv inn telefonnummer"
+                      className="text-black"
+                      maxLength={8}
+                      onChange={(e) => {
+                        const cleanedValue = e.target.value.replace(
+                          /[^0-9]/g,
+                          "",
+                        );
+                        e.target.value = cleanedValue;
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                <div className="w-full space-y-1 md:w-1/2">
-                  <Label htmlFor="email">E-post</Label>
-                  <Input
-                    id="email"
-                    placeholder="Skriv inn epost"
-                    className="text-black"
-                    maxLength={100}
-                    onChange={(e) => {
-                      const cleanedValue = e.target.value.replace(
-                        /[^a-zA-Z0-9@._-]/g, // allows letters, numbers, @, dot, underscore, and dash
-                        "",
-                      );
-                      e.target.value = cleanedValue;
-                    }}
-                  />
-                </div>
-                <div className="w-full space-y-1 md:w-1/2">
-                  <Label htmlFor="phone">Telefonnummer</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Skriv inn telefonnummer"
-                    className="text-black"
-                    maxLength={8}
-                    onChange={(e) => {
-                      const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
-                      e.target.value = cleanedValue;
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                <div className="w-full space-y-1 md:w-1/2">
-                  <Label htmlFor="fornavn">Studieretning</Label>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        aria-expanded={open}
-                        className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {value
-                          ? studies.find((studies) => studies.value === value)
-                              ?.label
-                          : "Velg studieretning"}
-                        <ChevronsUpDown className="opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full">
-                      <Command>
-                        <CommandInput
-                          placeholder="Finn studiekode"
-                          className=""
-                        />
-                        <CommandList>
-                          <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
-                          <CommandGroup>
-                            {studies.map((studies) => (
-                              <CommandItem
-                                key={studies.value}
-                                value={studies.value}
-                                onSelect={(currentValue) => {
-                                  setValue(
-                                    currentValue === value ? "" : currentValue,
-                                  );
-                                  setOpen(false);
-                                }}
-                              >
-                                {studies.label}
-                                <Check
-                                  className={cn(
-                                    value === studies.value
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="w-full space-y-1 md:w-1/2">
-                  <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                    <div className="w-full space-y-1 md:w-1/2">
-                      <Label htmlFor="gender">Kjønn</Label>
-                      <Select>
-                        <SelectTrigger className="w-full text-black">
-                          <SelectValue
-                            className="w-full"
-                            placeholder="Velg kjønn"
+                <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <Label htmlFor="fornavn">Studieretning</Label>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          aria-expanded={open}
+                          className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {value
+                            ? studies.find((studies) => studies.value === value)
+                                ?.label
+                            : "Velg studieretning"}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full">
+                        <Command>
+                          <CommandInput
+                            placeholder="Finn studiekode"
+                            className=""
                           />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Mann</SelectItem>
-                          <SelectItem value="female">Kvinne</SelectItem>
-                          <SelectItem value="other">Annet</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="w-full space-y-1 md:w-1/2">
-                      <Label htmlFor="grade">Årstrinn</Label>
-                      <Select>
-                        <SelectTrigger className="w-full text-black">
-                          <SelectValue
-                            className="w-full text-black"
-                            placeholder="Velg årstrinn"
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="firstGrade">1. klasse</SelectItem>
-                          <SelectItem value="secondGrade">2. klasse</SelectItem>
-                          <SelectItem value="thirdGrade">3. klasse</SelectItem>
-                          <SelectItem value="fourthGrade">4. klasse</SelectItem>
-                          <SelectItem value="fifthGrade">5. klasse</SelectItem>
-                        </SelectContent>
-                      </Select>
+                          <CommandList>
+                            <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
+                            <CommandGroup>
+                              {studies.map((studies) => (
+                                <CommandItem
+                                  key={studies.value}
+                                  value={studies.value}
+                                  onSelect={(currentValue) => {
+                                    setValue(
+                                      currentValue === value
+                                        ? ""
+                                        : currentValue,
+                                    );
+                                    setOpen(false);
+                                  }}
+                                >
+                                  {studies.label}
+                                  <Check
+                                    className={cn(
+                                      value === studies.value
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="w-full space-y-1 md:w-1/2">
+                    <div className="flex w-full flex-col md:flex-row md:space-x-4">
+                      <div className="w-full space-y-1 md:w-1/2">
+                        <Label htmlFor="gender">Kjønn</Label>
+                        <Select>
+                          <SelectTrigger className="w-full text-black">
+                            <SelectValue
+                              className="w-full"
+                              placeholder="Velg kjønn"
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Mann</SelectItem>
+                            <SelectItem value="female">Kvinne</SelectItem>
+                            <SelectItem value="other">Annet</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="w-full space-y-1 md:w-1/2">
+                        <Label htmlFor="grade">Årstrinn</Label>
+                        <Select>
+                          <SelectTrigger className="w-full text-black">
+                            <SelectValue
+                              className="w-full text-black"
+                              placeholder="Velg årstrinn"
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="firstGrade">
+                              1. klasse
+                            </SelectItem>
+                            <SelectItem value="secondGrade">
+                              2. klasse
+                            </SelectItem>
+                            <SelectItem value="thirdGrade">
+                              3. klasse
+                            </SelectItem>
+                            <SelectItem value="fourthGrade">
+                              4. klasse
+                            </SelectItem>
+                            <SelectItem value="fifthGrade">
+                              5. klasse
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end text-white">
-              <Button
-                variant="green"
-                className="w-[100%] md:w-[48%] lg:w-[22.5%]"
-              >
-                Søk nå!
-              </Button>
-            </CardFooter>
+              </CardContent>
+              <CardFooter className="flex justify-end text-white">
+                <Button
+                  variant="green"
+                  className="w-[100%] md:w-[48%] lg:w-[22.5%]"
+                >
+                  Søk nå!
+                </Button>
+              </CardFooter>
             </>
           ) : (
             /* CardContent when the application period for the current city is closed */
-            <CardContent className="text-white w-full mb-5">
-              <p className="mx-auto sm:w-9/10 md:w-4/5 text-center text-lg md:text-xl">
-                Søknadsperioden for {city} er dessverre stengt for semesteret. Vennligst kom tilbake senere for oppdateringer om fremtidige søknadsperioder.
+            <CardContent className="mb-5 w-full text-white">
+              <p className="mx-auto text-center text-lg sm:w-9/10 md:w-4/5 md:text-xl">
+                Søknadsperioden for {city} er dessverre stengt for semesteret.
+                Vennligst kom tilbake senere for oppdateringer om fremtidige
+                søknadsperioder.
               </p>
             </CardContent>
           )}
