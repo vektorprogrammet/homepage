@@ -37,7 +37,7 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
         />
       </div>
       <main className="mx-auto mb-6 flex h-[500px] w-full flex-col items-start overflow-y-scroll break-words rounded-md px-5 py-5 sm:w-[440px] md:w-[720px] lg:ml-16 lg:w-[820px] xl:ml-20 xl:w-[1100px]">
-        <div className="flex-grow">
+        <div className="w-full flex-grow">
           {<DepartmentCard department={active} />}
         </div>
       </main>
@@ -63,8 +63,8 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-10 sm:p-6 md:grid-cols-2">
-        <div>
+      <div className="grid w-full grid-cols-1 gap-10 sm:p-6 md:grid-cols-2">
+        <div className="min-w-0">
           <h3 className="font-bold text-2xl text-blue-800 dark:text-neutral-200">
             {name}
           </h3>
@@ -100,7 +100,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
             </div>
           )}
         </div>
-        <div className="divide-y divide-solid">
+        <div className="min-w-0 divide-y divide-solid">
           {contacts.map((contact) => {
             return (
               <div className="mt-5 py-2" key={contact.name}>
@@ -125,7 +125,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
         </div>
       </div>
       {openForContact && (
-        <div className="max-w-[600px] dark:bg-neutral-800">
+        <div className="mx-auto max-w-[600px] dark:bg-neutral-800">
           <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
             {`Kontakt styret i ${name}`}
           </div>
