@@ -29,14 +29,15 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
 
   return (
     <div className="mb-6 flex flex-col items-start md:mb-auto md:max-w-6xl md:flex-row">
-      <div className="ml-3 w-1/5">
+      <div className="md:absolute md:left-10">
         <TabMenu
+          className="w-full md:w-auto"
           tabs={Object.values(departments)}
           activeTab={active}
           setActiveTab={setActive}
         />
       </div>
-      <main className="mx-auto mb-6 flex h-[500px] w-full flex-col items-start overflow-y-scroll break-words rounded-md px-5 py-5 sm:w-[440px] md:w-[720px] lg:ml-16 lg:w-[820px] xl:ml-20 xl:w-[1100px]">
+      <main className="mx-auto mb-6 flex h-[500px] w-full flex-col items-start overflow-y-scroll break-words rounded-md px-5 py-5 sm:w-[440px] md:w-[720px] lg:w-[820px] xl:w-[920px]">
         <div className="w-full flex-grow">
           {<DepartmentCard department={active} />}
         </div>
