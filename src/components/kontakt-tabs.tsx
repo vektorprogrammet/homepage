@@ -108,13 +108,15 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
                 <div className="text-blue-800 dark:text-gray-200">
                   {contact.name}
                 </div>
-                <div className="mt-3 flex items-center gap-1 md:mt-8">
-                  {contact.title && <span>{contact.title}</span>}
+                <div className="mt-3 flex flex-wrap items-center gap-1 md:mt-8">
+                  {contact.title && (
+                    <span className="whitespace-nowrap">{contact.title}</span>
+                  )}
                   <button
                     onClick={async () => {
                       await navigator.clipboard.writeText(contact.mail);
                     }}
-                    className="hover:underline"
+                    className="break-all text-sm hover:underline md:text-base"
                     type="button"
                   >
                     {contact.mail}
