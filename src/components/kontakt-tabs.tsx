@@ -28,8 +28,8 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
   );
 
   return (
-    <div className="mb-6 flex flex-col items-start md:mb-auto md:max-w-6xl md:flex-row">
-      <div className="md:absolute md:left-10">
+    <div className="mb-6 flex w-full flex-col items-start md:mb-auto md:max-w-6xl md:flex-row">
+      <div className="w-full px-5 md:absolute md:left-10 md:w-auto md:px-0">
         <TabMenu
           className="w-full md:w-auto"
           tabs={Object.values(departments)}
