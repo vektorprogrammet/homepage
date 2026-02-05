@@ -108,7 +108,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
                 <div className="text-blue-800 dark:text-gray-200">
                   {contact.name}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-1 md:mt-8">
+                <div className="mt-3 flex flex-col items-start gap-1 md:mt-8 md:flex-row md:items-center">
                   {contact.title && (
                     <span className="whitespace-nowrap">{contact.title}</span>
                   )}
