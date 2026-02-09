@@ -3,13 +3,7 @@ import { SiFacebook } from "@icons-pack/react-simple-icons";
 import { FolderOpen, Mail, MapPin } from "lucide-react";
 import { motion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
-import {
-  Link,
-  NavLink,
-  Outlet,
-  type To,
-  useLocation,
-} from "react-router";
+import { Link, NavLink, Outlet, type To, useLocation } from "react-router";
 import { type Sponsor, getSponsors } from "~/api/sponsor";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
@@ -66,19 +60,22 @@ function NavTabs({
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef(new Map<string, HTMLAnchorElement>());
-  const [indicator, setIndicator] = useState<{ x: number; width: number } | null>(
-    null,
-  );
+  const [indicator, setIndicator] = useState<{
+    x: number;
+    width: number;
+  } | null>(null);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const pathname = location.pathname;
-    const activeKey = routes.find((route) => {
-      const routePath = route.path.toString();
-      return pathname === routePath || pathname.startsWith(`${routePath}/`);
-    })?.path.toString();
+    const activeKey = routes
+      .find((route) => {
+        const routePath = route.path.toString();
+        return pathname === routePath || pathname.startsWith(`${routePath}/`);
+      })
+      ?.path.toString();
 
     if (!activeKey) {
       setIndicator(null);
