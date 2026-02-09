@@ -84,7 +84,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           </div>
           {address && (
             <div className="mt-2 flex gap-1 text-sm">
-                <MapPin className="h-5 w-5 text-black" />
+              <MapPin className="h-5 w-5 text-black" />
               <span>{address}</span>
             </div>
           )}
