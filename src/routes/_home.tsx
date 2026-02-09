@@ -2,7 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SiFacebook } from "@icons-pack/react-simple-icons";
 import { FolderOpen, Mail, MapPin } from "lucide-react";
 import { motion } from "motion/react";
-import { Link, NavLink, Outlet, type To } from "react-router";
+import { useLayoutEffect, useRef, useState } from "react";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  type To,
+  useLocation,
+} from "react-router";
 import { type Sponsor, getSponsors } from "~/api/sponsor";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
@@ -56,34 +63,70 @@ function NavTabs({
 }: {
   routes: Array<{ name: string; path: To }>;
 }) {
+  const location = useLocation();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef(new Map<string, HTMLAnchorElement>());
+  const [indicator, setIndicator] = useState<{ x: number; width: number } | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const pathname = location.pathname;
+    const activeKey = routes.find((route) => {
+      const routePath = route.path.toString();
+      return pathname === routePath || pathname.startsWith(`${routePath}/`);
+    })?.path.toString();
+
+    if (!activeKey) {
+      setIndicator(null);
+      return;
+    }
+
+    const activeEl = tabRefs.current.get(activeKey);
+    if (!activeEl) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const activeRect = activeEl.getBoundingClientRect();
+    setIndicator({
+      x: activeRect.left - containerRect.left,
+      width: activeRect.width,
+    });
+  }, [location.pathname, routes]);
+
   return (
-    <div className="flew-row relative mx-auto flex h-11 rounded-full px-0.5">
+    <div
+      ref={containerRef}
+      className="flew-row relative mx-auto flex h-11 rounded-full px-0.5"
+    >
+      {indicator && (
+        <motion.div
+          className="absolute top-1.5 bottom-1.5 rounded-full bg-vektor-blue mix-blend-multiply shadow-sm"
+          animate={{ x: indicator.x, width: indicator.width }}
+          transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+        />
+      )}
       {routes.map((route) => {
+        const routeKey = route.path.toString();
         return (
           <NavLink
             to={route.path}
-            key={route.path.toString()}
+            key={routeKey}
             className={({ isActive }) =>
               `${isActive ? "text-black" : "text-neutral-700 hover:text-black"} relative my-1.5 place-content-center px-4 py-auto text-center font-medium text-sm`
             }
             prefetch="intent"
+            ref={(node) => {
+              if (node) {
+                tabRefs.current.set(routeKey, node);
+              } else {
+                tabRefs.current.delete(routeKey);
+              }
+            }}
           >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.div
-                    layoutId="active"
-                    className="absolute inset-0 rounded-full bg-vektor-blue mix-blend-multiply shadow-sm"
-                    transition={{
-                      type: "spring",
-                      bounce: 0.1,
-                      duration: 0.6,
-                    }}
-                  />
-                )}
-                {route.name}
-              </>
-            )}
+            {route.name}
           </NavLink>
         );
       })}
