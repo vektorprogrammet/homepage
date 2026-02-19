@@ -58,6 +58,41 @@ test.describe("Contact page", () => {
   });
 
   test("can submit message in contact form", async ({ page }) => {
+    // Mock the contact API so the form can submit successfully
+    await page.route("**/api/contact_messages", (route) =>
+      route.fulfill({ status: 201, body: "" }),
+    );
+    // Mock departments API so the form gets a departmentId
+    await page.route("**/api/departments", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([{
+          id: 1, name: "NTNU", shortName: "NTNU",
+          email: "styret.ntnu@vektorprogrammet.no",
+          address: "Høgskoleringen 5, 7491 Trondheim",
+          city: "Trondheim", latitude: 63.4, longitude: 10.4,
+          logoPath: null, active: true,
+        }]),
+      }),
+    );
+    await page.route("**/api/departments/*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: 1, name: "NTNU", shortName: "NTNU",
+          email: "styret.ntnu@vektorprogrammet.no",
+          address: "Høgskoleringen 5, 7491 Trondheim",
+          city: "Trondheim", latitude: 63.4, longitude: 10.4,
+          logoPath: null, active: true,
+          teams: [{ id: 10, name: "Styret", email: "styret.ntnu@vektorprogrammet.no", shortDescription: "", active: true }],
+        }),
+      }),
+    );
+
+    await page.goto("/kontakt");
+
     const name = page.getByLabel("Ditt navn");
     const email = page.getByLabel("Din e-post");
     const subject = page.getByLabel("Emne");
@@ -75,16 +110,12 @@ test.describe("Contact page", () => {
     await subject.fill("teams");
     await message.fill("How do I apply for teams?");
 
-    await expect(name).not.toBeEmpty();
-    await expect(email).not.toBeEmpty();
-    await expect(subject).not.toBeEmpty();
-    await expect(message).not.toBeEmpty();
+    await submitButton.click();
 
-    submitButton.click();
-    await expect(name).toBeEmpty();
-    await expect(email).toBeEmpty();
-    await expect(subject).toBeEmpty();
-    await expect(message).toBeEmpty();
+    // Form is replaced with success message after submission
+    await expect(page.getByText("Meldingen din er sendt!")).toBeVisible({
+      timeout: 10000,
+    });
   });
 });
 
