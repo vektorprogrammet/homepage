@@ -1,12 +1,7 @@
 import { Mail, Users } from "lucide-react";
 import { useState } from "react";
-import { Link, NavLink, type To } from "react-router";
-import {
-  teamsAas,
-  teamsBergen,
-  teamsHovedstyret,
-  teamsTrondheim,
-} from "~/api/team";
+import { Link, NavLink, type To, useOutletContext } from "react-router";
+import type { HovedstyretData, TeamListItem } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,8 +10,20 @@ import {
   departments,
 } from "~/lib/types";
 
+export interface TeamsData {
+  Trondheim: Array<TeamListItem>;
+  Bergen: Array<TeamListItem>;
+  Ås: Array<TeamListItem>;
+  hovedstyret: HovedstyretData;
+}
+
+export function useTeamsData() {
+  return useOutletContext<TeamsData>();
+}
+
 export function TeamTabs({ department }: { department: DepartmentPretty }) {
   const [active, setActive] = useState<DepartmentPretty>(department);
+  const teamsData = useTeamsData();
 
   return (
     <div
@@ -32,17 +39,16 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
       </div>
       <div className="flex w-full max-w-5xl flex-col items-start">
         {active === "Hovedstyret" ? (
-          <HovedstyretTab />
+          <HovedstyretTab team={teamsData.hovedstyret} />
         ) : (
-          <TeamTab team={active} />
+          <TeamTab teams={teamsData[active]} />
         )}
       </div>
     </div>
   );
 }
 
-function HovedstyretTab() {
-  const team = teamsHovedstyret();
+function HovedstyretTab({ team }: { team: HovedstyretData }) {
   return (
     <div className="flex flex-col md:ml-24 md:max-w-2xl md:flex-row lg:ml-16 xl:ml-auto">
       <div className="flex-1 object-contain">
@@ -86,14 +92,7 @@ function HovedstyretTab() {
   );
 }
 
-function TeamTab({ team }: { team: CityPretty }) {
-  const teams =
-    team === "Bergen"
-      ? teamsBergen()
-      : team === "Ås"
-        ? teamsAas()
-        : teamsTrondheim();
-
+function TeamTab({ teams }: { teams: Array<TeamListItem> }) {
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {teams.map((team) => (

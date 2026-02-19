@@ -1,6 +1,8 @@
 import { Mail, MapPin, Users } from "lucide-react";
-import { useState } from "react";
-import { info } from "~/api/kontakt";
+import { type FormEvent, useState } from "react";
+import { useOutletContext } from "react-router";
+import { sendContactMessage } from "~/api/contact";
+import type { TeamInfo } from "~/api/kontakt";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -8,24 +10,20 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { type DepartmentPretty, departments } from "~/lib/types";
 
+export interface ContactData {
+  Trondheim: TeamInfo;
+  Bergen: TeamInfo;
+  Ås: TeamInfo;
+  Hovedstyret: TeamInfo;
+}
+
+export function useContactData() {
+  return useOutletContext<ContactData>();
+}
+
 export function ContactTabs({ department }: { department: DepartmentPretty }) {
-  const [active, setActive] = useState<DepartmentPretty>(
-    department,
-    // ! ugly ass solution
-    /*     department === "hovedstyret"
-      ? departments.hovedstyret
-      : department === "aas"
-        ? departments.aas
-        : department === "bergen"
-          ? departments.bergen
-          : "Trondheim", */
-    // ! for some reason this doesn't work
-    /* department === undefined
-      ? "Trondheim"
-      : department in Object.keys(departments)
-        ? departments[department as keyof typeof departments]
-        : "Trondheim", */
-  );
+  const [active, setActive] = useState<DepartmentPretty>(department);
+  const contactData = useContactData();
 
   return (
     <div className="mb-6 flex flex-col items-start md:mb-auto md:max-w-6xl md:flex-row">
@@ -39,18 +37,14 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
       </div>
       <main className="mx-auto mb-6 flex h-[500px] w-full flex-col items-start overflow-y-scroll break-words rounded-md px-5 py-5 sm:w-[440px] md:w-[720px] lg:w-[820px] xl:w-[920px]">
         <div className="w-full flex-grow">
-          {<DepartmentCard department={active} />}
+          <DepartmentCard info={contactData[active]} />
         </div>
       </main>
     </div>
   );
 }
 
-function DepartmentCard({ department }: { department: DepartmentPretty }) {
-  const result = info(department);
-
-  if (result instanceof Error) return <span>{result.message}</span>;
-
+function DepartmentCard({ info }: { info: TeamInfo }) {
   const {
     name,
     description,
@@ -60,7 +54,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     button,
     contacts,
     openForContact,
-  } = result;
+  } = info;
 
   return (
     <>
@@ -126,44 +120,119 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
         </div>
       </div>
       {openForContact && (
-        <div className="mx-auto max-w-[600px] dark:bg-neutral-800">
-          <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
-            {`Kontakt styret i ${name}`}
-          </div>
-          <form>
-            <div className="mt-7 mb-6 grid xl:grid-cols-2 xl:gap-6">
-              <div>
-                <Label htmlFor="name">{"Ditt navn"}</Label>
-                <Input placeholder="Skriv inn navn" required />
-              </div>
-              <div>
-                <Label htmlFor="email">{"Din e-post"}</Label>
-                <Input placeholder="Skriv inn epost" required />
-              </div>
-            </div>
-            <div className="mb-6">
-              <div>
-                <Label htmlFor="topic">{"Emne"}</Label>
-                <Input placeholder="Skriv inn emnet for meldingen" required />
-              </div>
-            </div>
-            <div className="mb-6">
-              <div>
-                <Label htmlFor="message">{"Melding"}</Label>
-                <Textarea
-                  placeholder="Skriv inn meldingen din"
-                  rows={6}
-                  required
-                  id="message"
-                />
-              </div>
-            </div>
-            <Button className="bg-vektor-darkblue hover:bg-vektor-blue">
-              {"Send melding"}
-            </Button>
-          </form>
-        </div>
+        <ContactForm departmentName={name} departmentId={info.departmentId} />
       )}
     </>
+  );
+}
+
+function ContactForm({
+  departmentName,
+  departmentId,
+}: {
+  departmentName: string;
+  departmentId?: number;
+}) {
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!departmentId) return;
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    setStatus("sending");
+    try {
+      await sendContactMessage({
+        name: data.get("name") as string,
+        email: data.get("email") as string,
+        departmentId,
+        subject: data.get("subject") as string,
+        message: data.get("message") as string,
+      });
+      setStatus("sent");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="mx-auto max-w-[600px] pt-10 text-center">
+        <p className="font-bold text-lg text-green-700 dark:text-green-400">
+          Meldingen din er sendt!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-[600px] dark:bg-neutral-800">
+      <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
+        {`Kontakt styret i ${departmentName}`}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="mt-7 mb-6 grid xl:grid-cols-2 xl:gap-6">
+          <div>
+            <Label htmlFor="contact-name">{"Ditt navn"}</Label>
+            <Input
+              id="contact-name"
+              name="name"
+              placeholder="Skriv inn navn"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="contact-email">{"Din e-post"}</Label>
+            <Input
+              id="contact-email"
+              name="email"
+              type="email"
+              placeholder="Skriv inn epost"
+              required
+            />
+          </div>
+        </div>
+        <div className="mb-6">
+          <div>
+            <Label htmlFor="contact-subject">{"Emne"}</Label>
+            <Input
+              id="contact-subject"
+              name="subject"
+              placeholder="Skriv inn emnet for meldingen"
+              required
+            />
+          </div>
+        </div>
+        <div className="mb-6">
+          <div>
+            <Label htmlFor="contact-message">{"Melding"}</Label>
+            <Textarea
+              placeholder="Skriv inn meldingen din"
+              rows={6}
+              required
+              id="contact-message"
+              name="message"
+            />
+          </div>
+        </div>
+        {status === "error" && (
+          <p className="mb-4 text-red-600 dark:text-red-400">
+            Kunne ikke sende meldingen. Prøv igjen senere.
+          </p>
+        )}
+        <Button
+          type="submit"
+          className="bg-vektor-darkblue hover:bg-vektor-blue"
+          disabled={status === "sending" || !departmentId}
+        >
+          {status === "sending" ? "Sender..." : "Send melding"}
+        </Button>
+      </form>
+    </div>
   );
 }

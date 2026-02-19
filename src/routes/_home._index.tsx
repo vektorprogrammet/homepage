@@ -1,7 +1,8 @@
 import { buttonVariants } from "@/components/ui/button";
 import { useInView, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useRef } from "react";
-import { Link, type To, href } from "react-router";
+import { Link, type To, href, useLoaderData } from "react-router";
+import { getStatistics } from "~/api/statistics";
 import { Button } from "~/components/ui/button";
 import Abelprisen from "/images/mainPage/sponsor/Abelprisen.png";
 import ksBergen from "/images/mainPage/sponsor/KSBergen.png";
@@ -71,29 +72,35 @@ interface MainPageProps {
   };
 }
 
-const cards: Array<MainPageProps> = [
-  {
-    number: 2218,
-    title: "Assistenter",
-    text: "Over 2218 studenter har hatt et verv som vektorassistent i Vektorprogrammet",
-    route: {
-      path: href("/assistenter"),
-      text: "Les mer om assistenter",
-    },
-  },
-  {
-    number: 608,
-    title: "I team",
-    text: "Over 608 studenter har hatt et verv i et av Vektorprogrammets mange team",
-    route: {
-      path: href("/team"),
-      text: "Les mer om verv i team",
-    },
-  },
-];
+export async function loader() {
+  const stats = await getStatistics();
+  return { stats };
+}
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function mainPage() {
+  const { stats } = useLoaderData<typeof loader>();
+
+  const cards: Array<MainPageProps> = [
+    {
+      number: stats.assistantCount,
+      title: "Assistenter",
+      text: `Over ${stats.assistantCount} studenter har hatt et verv som vektorassistent i Vektorprogrammet`,
+      route: {
+        path: href("/assistenter"),
+        text: "Les mer om assistenter",
+      },
+    },
+    {
+      number: stats.teamMemberCount,
+      title: "I team",
+      text: `Over ${stats.teamMemberCount} studenter har hatt et verv i et av Vektorprogrammets mange team`,
+      route: {
+        path: href("/team"),
+        text: "Les mer om verv i team",
+      },
+    },
+  ];
   return (
     <main className="flex-grow">
       {/* Use component when the rendered component needs no props */}

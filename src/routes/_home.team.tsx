@@ -7,11 +7,32 @@ import {
 import { getTeamFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 
-import { Outlet } from "react-router";
-import { getTeam } from "~/api/team";
+import { Outlet, useLoaderData } from "react-router";
+import { getTeam, getTeamsByCity, getHovedstyret } from "~/api/team";
+import type { TeamsData } from "~/components/team-tabs";
+
+export async function loader() {
+  const [teamsTrondheim, teamsBergen, teamsAas, hovedstyret] =
+    await Promise.all([
+      getTeamsByCity("Trondheim"),
+      getTeamsByCity("Bergen"),
+      getTeamsByCity("Ås"),
+      getHovedstyret(),
+    ]);
+
+  return {
+    teams: {
+      Trondheim: teamsTrondheim,
+      Bergen: teamsBergen,
+      Ås: teamsAas,
+      hovedstyret,
+    } satisfies TeamsData,
+  };
+}
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team() {
+  const { teams } = useLoaderData<typeof loader>();
   const teamInfo = getTeam();
   const teamFaqs = getTeamFaqs();
   return (
@@ -51,7 +72,7 @@ export default function Team() {
       <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
         {teamInfo.title}
       </h1>
-      <Outlet />
+      <Outlet context={teams} />
       <Divider />
 
       {/* FAQ Section */}

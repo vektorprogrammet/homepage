@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SiFacebook } from "@icons-pack/react-simple-icons";
 import { FolderOpen, Mail, MapPin } from "lucide-react";
 import { motion } from "motion/react";
-import { Link, NavLink, Outlet, type To } from "react-router";
+import { Link, NavLink, Outlet, type To, useLoaderData } from "react-router";
 import { type Sponsor, getSponsors } from "~/api/sponsor";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
@@ -17,14 +17,20 @@ import {
 import "~/home.css";
 import { navRoutes } from "~/routes";
 
+export async function loader() {
+  const sponsors = await getSponsors();
+  return { sponsors };
+}
+
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Layout() {
+  const { sponsors } = useLoaderData<typeof loader>();
   return (
     <div className="flex min-h-screen flex-col items-stretch transition-colors">
       <AppHeader />
       {/* Banner */}
       <Outlet />
-      <AppFooter />
+      <AppFooter sponsors={sponsors} />
     </div>
   );
 }
@@ -159,7 +165,7 @@ const MobileMenu = ({
   );
 };
 
-function AppFooter() {
+function AppFooter({ sponsors }: { sponsors: Array<Sponsor> }) {
   return (
     <footer className="bg-vektor-DARKblue">
       <div className="mx-auto flex max-w-6xl flex-col place-items-center justify-between space-y-8 p-2 py-8 lg:flex-row lg:space-x-4 lg:space-y-0">
@@ -169,15 +175,13 @@ function AppFooter() {
           className="h-24 md:h-40"
         />
         <FooterLinks />
-        <FooterSponsors />
+        <FooterSponsors sponsors={sponsors} />
       </div>
     </footer>
   );
 }
 
-function FooterSponsors() {
-  const sponsors = getSponsors();
-
+function FooterSponsors({ sponsors }: { sponsors: Array<Sponsor> }) {
   return (
     <ul className="text-white">
       <b>
@@ -185,7 +189,7 @@ function FooterSponsors() {
       </b>
       {sponsors.map((sponsor: Sponsor) => (
         <li key={sponsor.name}>
-          <a className="text-sm hover:underline" href={sponsor.url.href}>
+          <a className="text-sm hover:underline" href={sponsor.url ?? "#"}>
             {sponsor.name}
           </a>
         </li>

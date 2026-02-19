@@ -1,3 +1,5 @@
+import { apiFetch } from "./client";
+import type { Department, DepartmentDetail } from "./departments";
 import type { DepartmentPretty } from "~/lib/types";
 
 interface KontaktCard {
@@ -13,6 +15,7 @@ interface KontaktContent {
   card: KontaktCard;
 }
 
+// Static header content — not in the API
 export function getKontakt(): KontaktContent {
   return {
     title: "Kontakt oss",
@@ -29,23 +32,7 @@ export function getKontakt(): KontaktContent {
   };
 }
 
-//! Case sensitive
-export function info(query: DepartmentPretty): TeamInfo | Error {
-  switch (query) {
-    case "Trondheim":
-      return infoTrondheim();
-    case "Ås":
-      return infoAas();
-    case "Bergen":
-      return infoBergen();
-    case "Hovedstyret":
-      return infoHovedstyret();
-    default:
-      return new Error("Unknown team");
-  }
-}
-
-type TeamInfo = {
+export type TeamInfo = {
   name: string;
   description: string;
   email: string;
@@ -54,6 +41,7 @@ type TeamInfo = {
   button?: boolean;
   contacts: Array<Contact>;
   openForContact: boolean;
+  departmentId?: number;
 };
 
 type Contact = {
@@ -62,7 +50,78 @@ type Contact = {
   mail: string;
 };
 
-function infoTrondheim(): TeamInfo {
+export async function getContactInfo(
+  query: DepartmentPretty,
+): Promise<TeamInfo> {
+  if (query === "Hovedstyret") {
+    return getFallbackHovedstyret();
+  }
+
+  try {
+    const departments = await apiFetch<Array<Department>>("/api/departments");
+    const dept = departments.find((d) => d.city === query);
+    if (!dept) return getFallbackInfo(query);
+
+    const detail = await apiFetch<DepartmentDetail>(
+      `/api/departments/${dept.id}`,
+    );
+
+    const contacts: Array<Contact> = detail.teams
+      .filter((t) => t.active)
+      .map((t) => ({ name: t.name, mail: t.email }));
+
+    return {
+      name: query,
+      description: descriptionForCity(query),
+      email: dept.email,
+      address: dept.address || undefined,
+      contacts: contacts.length > 0 ? contacts : getFallbackInfo(query).contacts,
+      openForContact: true,
+      departmentId: dept.id,
+    };
+  } catch (error) {
+    console.error(`Failed to fetch contact info for ${query}:`, error);
+    return getFallbackInfo(query);
+  }
+}
+
+function descriptionForCity(city: string): string {
+  switch (city) {
+    case "Trondheim":
+      return "Norges teknisk-naturvitenskapelige universitet";
+    case "Ås":
+      return "Norges miljø- og biovitenskapelige universitet";
+    case "Bergen":
+      return "Universitetet i Bergen";
+    default:
+      return "";
+  }
+}
+
+// --- Fallback data ---
+
+function getFallbackInfo(query: DepartmentPretty): TeamInfo {
+  switch (query) {
+    case "Trondheim":
+      return getFallbackTrondheim();
+    case "Ås":
+      return getFallbackAas();
+    case "Bergen":
+      return getFallbackBergen();
+    case "Hovedstyret":
+      return getFallbackHovedstyret();
+    default:
+      return {
+        name: query,
+        description: "",
+        email: "",
+        contacts: [],
+        openForContact: false,
+      };
+  }
+}
+
+function getFallbackTrondheim(): TeamInfo {
   return {
     name: "Trondheim",
     description: "Norges teknisk-naturvitenskapelige universitet",
@@ -71,10 +130,7 @@ function infoTrondheim(): TeamInfo {
     contacts: [
       { name: "Styret", mail: "styret.ntnu@vektorprogrammet.no" },
       { name: "Evaluering", mail: "evaluering.ntnu@vektorprogrammet.no" },
-      {
-        name: "Rekruttering",
-        mail: "rekruttering.ntnu@vektorprogrammet.no",
-      },
+      { name: "Rekruttering", mail: "rekruttering.ntnu@vektorprogrammet.no" },
       {
         name: "Skolekoordinering",
         mail: "skolekoordinering.ntnu@vektorprogrammet.no",
@@ -88,7 +144,7 @@ function infoTrondheim(): TeamInfo {
   };
 }
 
-function infoAas(): TeamInfo {
+function getFallbackAas(): TeamInfo {
   return {
     name: "Ås",
     description: "Norges miljø- og biovitenskapelige universitet",
@@ -112,7 +168,7 @@ function infoAas(): TeamInfo {
   };
 }
 
-function infoBergen(): TeamInfo {
+function getFallbackBergen(): TeamInfo {
   return {
     name: "Bergen",
     description: "Universitetet i Bergen",
@@ -132,7 +188,7 @@ function infoBergen(): TeamInfo {
   };
 }
 
-function infoHovedstyret(): TeamInfo {
+function getFallbackHovedstyret(): TeamInfo {
   return {
     name: "Hovedstyret",
     description:
