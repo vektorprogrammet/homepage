@@ -22,7 +22,7 @@ export function TabMenu<T extends string>({
   setActiveTab: (tab: T) => void;
   className?: string;
 }) {
-  const isSmallScreen = useMediaQuery("(max-width: 860px)");
+  const isSmallScreen = useMediaQuery("(max-width: 1023px)");
   const [isOpen, setIsOpen] = useState(false);
 
   if (isSmallScreen) {
