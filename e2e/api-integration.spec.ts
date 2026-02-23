@@ -72,6 +72,29 @@ const mockSponsors = [
   },
 ];
 
+const mockStaticContent = [
+  {
+    id: 1,
+    htmlId: "assistants-header",
+    html: "<h1>Test Assistenter</h1><p>Test ingress for assistenter</p>",
+  },
+  {
+    id: 2,
+    htmlId: "about-header",
+    html: "<h1>Test Om Oss</h1><p>Test ingress for om oss</p>",
+  },
+  {
+    id: 3,
+    htmlId: "parent-header",
+    html: "<h1>Test Foreldre</h1><p>Test ingress for foreldre</p>",
+  },
+  {
+    id: 4,
+    htmlId: "about-faq",
+    html: "<h5>Test question 1?</h5><p>Test answer 1</p><h5>Test question 2?</h5><p>Test answer 2</p>",
+  },
+];
+
 function setupApiMocks(page: import("@playwright/test").Page) {
   return Promise.all([
     page.route("**/api/departments", (route) => {
@@ -113,6 +136,13 @@ function setupApiMocks(page: import("@playwright/test").Page) {
     ),
     page.route("**/api/contact_messages", (route) =>
       route.fulfill({ status: 201, body: "" }),
+    ),
+    page.route("**/api/static_contents", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockStaticContent),
+      }),
     ),
   ]);
 }
@@ -199,6 +229,48 @@ test.describe("Kontakt page from API", () => {
   });
 });
 
+test.describe("Assistenter page", () => {
+  test("renders assistenter page heading and cards", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/assistenter");
+
+    // Should show heading (either from API or fallback)
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+    // Should show motivation cards
+    await expect(page.getByText("Hvorfor bli assistent?")).toBeVisible();
+  });
+
+  test("renders FAQ section on assistenter page", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/assistenter");
+
+    await expect(page.getByText("Ofte stilte spørsmål")).toBeVisible();
+  });
+});
+
+test.describe("Foreldre page", () => {
+  test("renders foreldre page heading and content", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/foreldre");
+
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    // Should show card content (from fallback)
+    await expect(page.getByText("Assistentene").first()).toBeVisible();
+  });
+});
+
+test.describe("Om oss page", () => {
+  test("renders om-oss page heading and content", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/om-oss");
+
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    // Should show bottom section
+    await expect(page.getByText("En forsmak til læreryrket!")).toBeVisible();
+  });
+});
+
 test.describe("Fallback behavior when API is down", () => {
   test("homepage still renders with fallback statistics", async ({ page }) => {
     // Mock API to fail
@@ -213,6 +285,20 @@ test.describe("Fallback behavior when API is down", () => {
       page.getByRole("heading", { name: "Vektorprogrammet" }),
     ).toBeVisible();
     await expect(page.locator("text=Assistenter").first()).toBeVisible();
+  });
+
+  test("assistenter page renders with fallback when API is down", async ({
+    page,
+  }) => {
+    await page.route("**/api/**", (route) =>
+      route.fulfill({ status: 500, body: "Internal Server Error" }),
+    );
+    await page.goto("/assistenter");
+
+    // Should show heading from fallback data
+    await expect(
+      page.getByRole("heading", { name: "Assistenter" }),
+    ).toBeVisible();
   });
 
   test("team page still renders with fallback teams", async ({ page }) => {
