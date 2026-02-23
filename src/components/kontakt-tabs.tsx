@@ -28,16 +28,16 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
   );
 
   return (
-    <div className="mb-6 flex w-full flex-col items-start md:mb-auto md:max-w-6xl md:flex-row">
-      <div className="w-full px-5 md:absolute md:left-10 md:w-auto md:px-0">
+    <div className="mb-6 flex w-full flex-col items-start md:mb-auto md:max-w-6xl lg:flex-row">
+      <div className="mx-auto w-full px-5 sm:w-[440px] md:w-[400px] lg:absolute lg:left-10 lg:w-auto lg:px-0">
         <TabMenu
-          className="w-full md:w-auto"
+          className="w-full lg:w-auto"
           tabs={Object.values(departments)}
           activeTab={active}
           setActiveTab={setActive}
         />
       </div>
-      <main className="mx-auto mb-6 flex h-[500px] w-full flex-col items-start overflow-y-scroll break-words rounded-md px-5 py-5 sm:w-[440px] md:w-[720px] lg:w-[820px] xl:w-[920px]">
+      <main className="mx-auto mb-6 flex h-[500px] w-[calc(100%-1rem)] flex-col items-start overflow-y-scroll break-words rounded-md px-5 pt-0 pb-5 sm:w-[440px] md:w-[400px] lg:w-[480px] xl:w-[920px]">
         <div className="w-full flex-grow">
           {<DepartmentCard department={active} />}
         </div>
@@ -64,7 +64,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
 
   return (
     <>
-      <div className="grid w-full grid-cols-1 gap-10 sm:p-6 md:grid-cols-2">
+      <div className="grid w-full grid-cols-1 gap-10 sm:p-6 lg:pt-0 xl:grid-cols-2">
         <div className="min-w-0">
           <h3 className="font-bold text-2xl text-blue-800 dark:text-neutral-200">
             {name}
