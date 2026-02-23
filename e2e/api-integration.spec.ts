@@ -95,6 +95,33 @@ const mockStaticContent = [
   },
 ];
 
+const mockArticles = [
+  {
+    id: 1,
+    title: "Test Sticky Article",
+    slug: "test-sticky",
+    article: "<p>This is a sticky test article</p>",
+    imageLarge: null,
+    imageSmall: null,
+    created: "2026-01-15T12:00:00+00:00",
+    updated: null,
+    sticky: true,
+    published: true,
+  },
+  {
+    id: 2,
+    title: "Test Regular Article",
+    slug: "test-regular",
+    article: "<p>This is a regular test article</p>",
+    imageLarge: null,
+    imageSmall: null,
+    created: "2026-01-10T12:00:00+00:00",
+    updated: null,
+    sticky: false,
+    published: true,
+  },
+];
+
 function setupApiMocks(page: import("@playwright/test").Page) {
   return Promise.all([
     page.route("**/api/departments", (route) => {
@@ -142,6 +169,13 @@ function setupApiMocks(page: import("@playwright/test").Page) {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(mockStaticContent),
+      }),
+    ),
+    page.route("**/api/articles*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockArticles),
       }),
     ),
   ]);
@@ -271,6 +305,60 @@ test.describe("Om oss page", () => {
   });
 });
 
+test.describe("News list page", () => {
+  test("renders news page heading and article cards", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/nyheter");
+
+    await expect(
+      page.getByRole("heading", { name: "Nyheter" }),
+    ).toBeVisible();
+
+    // Should show article titles
+    await expect(page.getByText("Test Sticky Article")).toBeVisible();
+    await expect(page.getByText("Test Regular Article")).toBeVisible();
+  });
+
+  test("shows sticky badge on sticky articles", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/nyheter");
+
+    await expect(page.getByText("Festet")).toBeVisible();
+  });
+});
+
+test.describe("Article detail page", () => {
+  test("renders article content", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/nyheter/test-sticky");
+
+    await expect(
+      page.getByRole("heading", { name: "Test Sticky Article" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("This is a sticky test article"),
+    ).toBeVisible();
+  });
+
+  test("shows back link to news list", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/nyheter/test-sticky");
+
+    await expect(
+      page.getByText("Tilbake til nyheter"),
+    ).toBeVisible();
+  });
+
+  test("shows not found for invalid slug", async ({ page }) => {
+    await setupApiMocks(page);
+    await page.goto("/nyheter/nonexistent-slug");
+
+    await expect(
+      page.getByText("Artikkelen ble ikke funnet"),
+    ).toBeVisible();
+  });
+});
+
 test.describe("Fallback behavior when API is down", () => {
   test("homepage still renders with fallback statistics", async ({ page }) => {
     // Mock API to fail
@@ -310,6 +398,20 @@ test.describe("Fallback behavior when API is down", () => {
 
     await expect(
       page.getByRole("heading", { name: "Styre og team" }),
+    ).toBeVisible();
+  });
+
+  test("news page renders empty state when API is down", async ({ page }) => {
+    await page.route("**/api/**", (route) =>
+      route.fulfill({ status: 500, body: "Internal Server Error" }),
+    );
+    await page.goto("/nyheter");
+
+    await expect(
+      page.getByRole("heading", { name: "Nyheter" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Ingen nyheter tilgjengelig"),
     ).toBeVisible();
   });
 });
