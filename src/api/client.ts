@@ -16,3 +16,8 @@ export async function apiFetch<T>(
 
   return response.json();
 }
+
+export function imageUrl(path: string | null): string | null {
+  if (!path) return null;
+  return `${API_BASE_URL}/${path}`;
+}
