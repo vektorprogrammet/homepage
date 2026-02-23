@@ -190,7 +190,7 @@ const MobileMenu = ({
           </DrawerDescription>
           <DrawerFooter>
             <DrawerClose>
-              <Button variant="outline">{"Close"}</Button>
+              <Button variant="outline">{"Lukk"}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
