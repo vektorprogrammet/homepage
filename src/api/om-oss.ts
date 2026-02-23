@@ -1,3 +1,4 @@
+import { getContentByPrefix } from "./static-content";
 import type { TextPictureParagraphApiProps } from "~/components/text-picture-paragraph";
 
 interface OmOssContent {
@@ -12,11 +13,21 @@ interface OmOssContent {
   cards: Array<TextPictureParagraphApiProps>;
 }
 
-// TODO: This data should be fetched from backend later
-export function getOmOss(): OmOssContent {
+export async function getOmOss(): Promise<OmOssContent> {
+  try {
+    const content = await getContentByPrefix("about-");
+    if (content.size === 0) return getFallbackOmOss();
+    return getFallbackOmOss(); // HTML parsing deferred — structured data not yet available from API
+  } catch (error) {
+    console.error("Failed to fetch om-oss content:", error);
+    return getFallbackOmOss();
+  }
+}
+
+function getFallbackOmOss(): OmOssContent {
   return {
     title: "Om Vektorprogrammet",
-    ingress: `Vektorprogrammet arbeider for å øke interessen for matematikk 
+    ingress: `Vektorprogrammet arbeider for å øke interessen for matematikk
         og realfag blant elever i grunnskolen. Vi er en nasjonal studentorganisasjon
         som sender studenter med god realfagskompetanse til skoler
         for å hjelpe elevene i matematikktimene. Disse
@@ -50,11 +61,11 @@ export function getOmOss(): OmOssContent {
       },
       {
         title: "Motivere studenter",
-        text: `Vi har som mål at alle studentene skal 
-          sitte igjen mer motivert for videre studier 
-          etter å ha vært vektorassistent. Av erfaring 
+        text: `Vi har som mål at alle studentene skal
+          sitte igjen mer motivert for videre studier
+          etter å ha vært vektorassistent. Av erfaring
           vet vi at muligheten til å formidle egen kunnskap
-           og se at deres arbeid gir elevene 
+           og se at deres arbeid gir elevene
            mestringsfølelse er en sterk motivasjonsfaktor. Videre arrangerer
             vi både sosiale og faglige arrangementer for å
              forsterke denne motivasjonen.`,

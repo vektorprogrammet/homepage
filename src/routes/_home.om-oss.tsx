@@ -1,11 +1,16 @@
 import { getOmOss } from "@/api/om-oss";
+import { useLoaderData } from "react-router";
 import { Divider } from "~/components/divider";
 import { TextPictureParagraph } from "~/components/text-picture-paragraph";
+
+export async function loader() {
+  return await getOmOss();
+}
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function OmOss() {
   const { title, ingress, bottomText, bottomHeader, bottomImage, cards } =
-    getOmOss();
+    useLoaderData<typeof loader>();
 
   return (
     <div className="mt-20 mb-20 flex max-w-4xl flex-col items-center gap-10 self-center p-5 md:gap-28 dark:text-text-dark">
