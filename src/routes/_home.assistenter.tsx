@@ -24,6 +24,7 @@ import {
 import { TabsContent } from "@/components/ui/tabs";
 import { Tabs } from "@radix-ui/react-tabs";
 import { useRef, useState } from "react";
+import { useLoaderData } from "react-router";
 import { getAssistenter } from "~/api/assistenter";
 import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
@@ -55,6 +56,14 @@ import { studyOptions } from "~/lib/studies";
 
 const studies = studyOptions.map((value) => ({ value, label: value }));
 
+export async function loader() {
+  const [assistenterData, assistantFaqs] = await Promise.all([
+    getAssistenter(),
+    getAssistantFaqs(),
+  ]);
+  return { assistenterData, assistantFaqs };
+}
+
 /* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
 const cityApplicationOpen: Record<City, boolean> = {
   trondheim: true,
@@ -73,7 +82,8 @@ const isApplicationOpen = (cityPretty: CityPretty) => {
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Assistenter() {
-  const { title, ingress, cards } = getAssistenter();
+  const { assistenterData, assistantFaqs } = useLoaderData<typeof loader>();
+  const { title, ingress, cards } = assistenterData;
 
   const cardElement = useRef<HTMLDivElement>(null);
   const scrollToCard = () =>
@@ -81,8 +91,6 @@ export default function Assistenter() {
       behavior: "smooth",
       block: "center",
     });
-
-  const assistantFaqs = getAssistantFaqs();
 
   return (
     <div className="mt-20 mb-20 flex w-full flex-col items-center gap-10 self-center pt-5 pb-5 font-sans leading-relaxed dark:text-text-dark">

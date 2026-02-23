@@ -1,3 +1,5 @@
+import { getContentByPrefix } from "./static-content";
+
 interface AssistentMotivationCard {
   title: string;
   text: string;
@@ -13,10 +15,33 @@ interface ForAssistenterContent {
   cards: Array<AssistentMotivationCard>;
 }
 
-// Lag et card for elementene på forrige side
+function extractText(html: string, tag: string): string | null {
+  const match = html.match(new RegExp(`<${tag}[^>]*>(.*?)</${tag}>`, "s"));
+  return match ? match[1].replace(/<[^>]*>/g, "").trim() : null;
+}
 
-// TODO: This data should be fetched from backend later
-export function getAssistenter(): ForAssistenterContent {
+export async function getAssistenter(): Promise<ForAssistenterContent> {
+  try {
+    const content = await getContentByPrefix("assistants-");
+    if (content.size === 0) return getFallbackAssistenter();
+
+    const headerHtml = content.get("assistants-header") ?? "";
+    const title = extractText(headerHtml, "h1") ?? "Assistenter";
+    const ingress =
+      extractText(headerHtml, "p") ?? getFallbackAssistenter().ingress;
+
+    return {
+      title,
+      ingress,
+      cards: getFallbackAssistenter().cards,
+    };
+  } catch (error) {
+    console.error("Failed to fetch assistenter content:", error);
+    return getFallbackAssistenter();
+  }
+}
+
+function getFallbackAssistenter(): ForAssistenterContent {
   return {
     title: "Assistenter",
     ingress: `Vektorassistent er et frivillig verv der du reiser til en ungdomsskole
