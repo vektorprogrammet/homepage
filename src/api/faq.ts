@@ -1,9 +1,55 @@
+import { getStaticContent } from "./static-content";
+
 interface Faq {
   question: string;
   answer: string;
 }
 
-export function getAssistantFaqs(): Array<Faq> {
+function parseFaqHtml(html: string): Array<Faq> {
+  const faqs: Array<Faq> = [];
+  const pattern = /<h5[^>]*>([\s\S]*?)<\/h5>\s*<p[^>]*>([\s\S]*?)<\/p>/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(html)) !== null) {
+    const question = match[1].replace(/<[^>]*>/g, "").trim();
+    const answer = match[2].replace(/<[^>]*>/g, "").trim();
+    if (question && answer) {
+      faqs.push({ question, answer });
+    }
+  }
+  return faqs;
+}
+
+export async function getAssistantFaqs(): Promise<Array<Faq>> {
+  try {
+    const content = await getStaticContent();
+    const faqHtml = content.get("about-faq");
+    if (faqHtml) {
+      const allFaqs = parseFaqHtml(faqHtml);
+      if (allFaqs.length >= 9) return allFaqs.slice(0, 9);
+    }
+    return getFallbackAssistantFaqs();
+  } catch (error) {
+    console.error("Failed to fetch FAQ:", error);
+    return getFallbackAssistantFaqs();
+  }
+}
+
+export async function getTeamFaqs(): Promise<Array<Faq>> {
+  try {
+    const content = await getStaticContent();
+    const faqHtml = content.get("about-faq");
+    if (faqHtml) {
+      const allFaqs = parseFaqHtml(faqHtml);
+      if (allFaqs.length > 9) return allFaqs.slice(9);
+    }
+    return getFallbackTeamFaqs();
+  } catch (error) {
+    console.error("Failed to fetch team FAQ:", error);
+    return getFallbackTeamFaqs();
+  }
+}
+
+function getFallbackAssistantFaqs(): Array<Faq> {
   return [
     {
       question: "Er verv i Vektorprogrammet betalt?",
@@ -55,7 +101,7 @@ export function getAssistantFaqs(): Array<Faq> {
   ];
 }
 
-export function getTeamFaqs(): Array<Faq> {
+function getFallbackTeamFaqs(): Array<Faq> {
   return [
     {
       question: "Hvordan søker jeg team?",
