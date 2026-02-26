@@ -46,7 +46,7 @@ export default function TeamApplicationPage() {
         }
       </p>
 
-      <form className="mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
+      <form className="mx-[clamp(1rem,4vw,3rem)] mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="fornavn">{"Fornavn"}</Label>
