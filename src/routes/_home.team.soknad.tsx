@@ -1,0 +1,116 @@
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
+
+// biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
+export default function TeamApplicationPage() {
+  const [grade, setGrade] = useState("firstGrade");
+
+  return (
+    <section className="mx-auto mb-20 w-full max-w-5xl px-4">
+      <h2 className="text-center font-bold text-3xl text-vektor-DARKblue md:text-4xl">
+        {"Søk team-verv"}
+      </h2>
+      <p className="mx-auto mt-4 max-w-2xl text-center text-md md:text-lg">
+        {
+          "Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet."
+        }
+      </p>
+
+      <form className="mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="fornavn">{"Fornavn"}</Label>
+            <Input id="fornavn" name="fornavn" placeholder="Ola" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="etternavn">{"Etternavn"}</Label>
+            <Input id="etternavn" name="etternavn" placeholder="Nordmann" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="email">{"Email"}</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="navn@eksempel.no"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">{"Telefon"}</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="+47 123 45 678"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="grade">{"Årstrinn"}</Label>
+          <input type="hidden" name="grade" value={grade} />
+          <Select defaultValue={grade} onValueChange={setGrade}>
+            <SelectTrigger id="grade" className="w-full text-black">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="firstGrade">{"1. klasse"}</SelectItem>
+              <SelectItem value="secondGrade">{"2. klasse"}</SelectItem>
+              <SelectItem value="thirdGrade">{"3. klasse"}</SelectItem>
+              <SelectItem value="fourthGrade">{"4. klasse"}</SelectItem>
+              <SelectItem value="fifthGrade">{"5. klasse"}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="line">{"Linje"}</Label>
+          <Input id="line" name="line" placeholder="F.eks. Datateknologi" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="aboutYourself">{"Skriv litt om deg selv"}</Label>
+          <Textarea
+            id="aboutYourself"
+            name="aboutYourself"
+            placeholder="Fortell litt om bakgrunnen din og hva du liker å jobbe med."
+            rows={12}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="motivation">
+            {"Skriv kort om din motivasjon for vervet"}
+          </Label>
+          <Textarea
+            id="motivation"
+            name="motivation"
+            placeholder="Hvorfor ønsker du dette vervet?"
+            rows={6}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          variant="green"
+          className="mt-8 w-full text-base uppercase"
+        >
+          {"Send"}
+        </Button>
+      </form>
+    </section>
+  );
+}
