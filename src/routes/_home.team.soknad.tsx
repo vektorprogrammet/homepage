@@ -50,11 +50,21 @@ export default function TeamApplicationPage() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="fornavn">{"Fornavn"}</Label>
-            <Input id="fornavn" name="fornavn" placeholder="Ola" />
+            <Input
+              id="fornavn"
+              name="fornavn"
+              placeholder="Ola"
+              className="text-black"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="etternavn">{"Etternavn"}</Label>
-            <Input id="etternavn" name="etternavn" placeholder="Nordmann" />
+            <Input
+              id="etternavn"
+              name="etternavn"
+              placeholder="Nordmann"
+              className="text-black"
+            />
           </div>
         </div>
 
@@ -66,6 +76,7 @@ export default function TeamApplicationPage() {
               name="email"
               type="email"
               placeholder="navn@eksempel.no"
+              className="text-black"
             />
           </div>
           <div className="space-y-2">
@@ -74,7 +85,13 @@ export default function TeamApplicationPage() {
               id="phone"
               name="phone"
               type="tel"
-              placeholder="+47 123 45 678"
+              placeholder="Skriv inn telefonnummer"
+              className="text-black"
+              maxLength={8}
+              onChange={(e) => {
+                const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+                e.target.value = cleanedValue;
+              }}
             />
           </div>
         </div>
@@ -114,7 +131,10 @@ export default function TeamApplicationPage() {
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command>
-                <CommandInput placeholder="Finn studiekode" />
+                <CommandInput
+                  placeholder="Finn studiekode"
+                  className="text-black"
+                />
                 <CommandList>
                   <CommandEmpty>{"Studiekode ikke funnet."}</CommandEmpty>
                   <CommandGroup>
@@ -154,6 +174,7 @@ export default function TeamApplicationPage() {
             name="aboutYourself"
             placeholder="Fortell litt om bakgrunnen din og hva du liker å jobbe med."
             rows={6}
+            className="text-black"
           />
         </div>
 
@@ -166,6 +187,7 @@ export default function TeamApplicationPage() {
             name="motivation"
             placeholder="Hvorfor ønsker du dette vervet?"
             rows={6}
+            className="text-black"
           />
         </div>
 
