@@ -1,7 +1,21 @@
+import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -10,10 +24,16 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { studyOptions } from "~/lib/studies";
+import { cn } from "~/lib/utils";
+
+const studies = studyOptions.map((value) => ({ value, label: value }));
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function TeamApplicationPage() {
   const [grade, setGrade] = useState("firstGrade");
+  const [lineOpen, setLineOpen] = useState(false);
+  const [lineValue, setLineValue] = useState("");
 
   return (
     <section className="mx-auto mb-20 w-full max-w-5xl px-4">
@@ -78,7 +98,53 @@ export default function TeamApplicationPage() {
 
         <div className="space-y-2">
           <Label htmlFor="line">{"Linje"}</Label>
-          <Input id="line" name="line" placeholder="F.eks. Datateknologi" />
+          <input type="hidden" name="line" value={lineValue} />
+          <Popover open={lineOpen} onOpenChange={setLineOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                aria-expanded={lineOpen}
+                className="w-full justify-between border-gray-300 bg-white text-left font-normal text-black hover:bg-gray-100"
+              >
+                {lineValue
+                  ? studies.find((study) => study.value === lineValue)?.label
+                  : "Velg studieretning"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <Command>
+                <CommandInput placeholder="Finn studiekode" />
+                <CommandList>
+                  <CommandEmpty>{"Studiekode ikke funnet."}</CommandEmpty>
+                  <CommandGroup>
+                    {studies.map((study) => (
+                      <CommandItem
+                        key={study.value}
+                        value={study.value}
+                        onSelect={(currentValue) => {
+                          setLineValue(
+                            currentValue === lineValue ? "" : currentValue,
+                          );
+                          setLineOpen(false);
+                        }}
+                      >
+                        {study.label}
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            lineValue === study.value
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="space-y-2">
@@ -87,7 +153,7 @@ export default function TeamApplicationPage() {
             id="aboutYourself"
             name="aboutYourself"
             placeholder="Fortell litt om bakgrunnen din og hva du liker å jobbe med."
-            rows={12}
+            rows={6}
           />
         </div>
 
