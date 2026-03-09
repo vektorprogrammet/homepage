@@ -122,7 +122,9 @@ export default function mainPage() {
               assistent i matematikkundervisningen`}
             </p>
           </div>
-          <Button variant="green">{"Les mer og bli assistent"}</Button>
+          <Link to="/assistenter" prefetch="intent">
+            <Button variant="green">{"Les mer og bli assistent"}</Button>
+          </Link>
         </div>
       </div>
       {/*Upper end*/}
