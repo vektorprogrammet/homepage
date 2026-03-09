@@ -7,13 +7,20 @@ import {
 import { getTeamFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { getTeam } from "~/api/team";
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team() {
   const teamInfo = getTeam();
   const teamFaqs = getTeamFaqs();
+  const { pathname } = useLocation();
+  const isTeamApplicationPage =
+    pathname === "/team/soknad" || pathname === "/team/soknad/";
+  const teamFaqsForPage = isTeamApplicationPage
+    ? teamFaqs.filter(({ question }) => question !== "Hvordan søker jeg team?")
+    : teamFaqs;
+
   return (
     <div className="mx-auto mt-20 mb-20 flex w-full max-w-6xl flex-col items-center">
       <header className="mx-auto flex w-full flex-wrap justify-around">
@@ -24,9 +31,11 @@ export default function Team() {
           <div className="mx-3 mt-4 mb-20 max-w-md text-xl dark:text-gray-300">
             <span className="mb-4">{teamInfo.card.text1}</span>
             {teamInfo.card.text2}
-            <div className="mt-6">
-              <strong>{teamInfo.card.text3}</strong>
-            </div>
+            {!isTeamApplicationPage && (
+              <div className="mt-6">
+                <strong>{teamInfo.card.text3}</strong>
+              </div>
+            )}
           </div>
         </div>
         <div className="relative mt-10">
@@ -48,9 +57,11 @@ export default function Team() {
           />
         </div>
       </header>
-      <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
-        {teamInfo.title}
-      </h1>
+      {!isTeamApplicationPage && (
+        <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
+          {teamInfo.title}
+        </h1>
+      )}
       <Outlet />
       <Divider />
 
@@ -61,7 +72,7 @@ export default function Team() {
         </h2>
         <div className="flex w-full flex-col items-center">
           <Accordion type="single" collapsible className="w-full">
-            {teamFaqs.map(({ question, answer }) => (
+            {teamFaqsForPage.map(({ question, answer }) => (
               <AccordionItem key={question} value={question}>
                 <AccordionTrigger>
                   <p className="text-left">{question}</p>
