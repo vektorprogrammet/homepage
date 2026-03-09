@@ -174,7 +174,7 @@ export default function TeamApplicationPage() {
                 className="text-black"
                 maxLength={8}
                 onChange={(e) => {
-                  const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+                  const cleanedValue = e.target.value.replaceAll(/\D/g, "");
                   e.target.value = cleanedValue;
                 }}
               />
