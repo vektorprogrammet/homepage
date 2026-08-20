@@ -52,11 +52,7 @@ function AppHeader() {
   );
 }
 
-function NavTabs({
-  routes,
-}: {
-  routes: Array<{ name: string; path: To }>;
-}) {
+function NavTabs({ routes }: { routes: Array<{ name: string; path: To }> }) {
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef(new Map<string, HTMLAnchorElement>());
@@ -130,13 +126,13 @@ function NavTabs({
     </div>
   );
 }
-
+// Redirect login to old dashboard
 function LoginButtons() {
   return (
     <div className="flex space-x-4 overflow-clip rounded-full">
       <Link
         className={buttonVariants({ variant: "green" })}
-        to={"/kontrollpanel"}
+        to="https://vektorprogrammet.no/kontrollpanel"
         prefetch="intent"
       >
         {"Logg inn"}
@@ -147,7 +143,9 @@ function LoginButtons() {
 
 const MobileMenu = ({
   routes,
-}: { routes: Array<{ name: string; path: To }> }) => {
+}: {
+  routes: Array<{ name: string; path: To }>;
+}) => {
   return (
     <div className="md:hidden">
       <Drawer>
