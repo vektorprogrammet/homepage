@@ -37,7 +37,7 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
           setActiveTab={setActive}
         />
       </div>
-      <main className="mx-auto mb-6 flex h-[500px] w-[calc(100%-1rem)] flex-col items-start overflow-y-scroll break-words rounded-md px-5 pt-0 pb-5 sm:w-[440px] md:w-[400px] lg:w-[480px] xl:w-[920px]">
+      <main className="mx-auto mb-6 flex min-h-[500px] w-[calc(100%-1rem)] flex-col items-start overflow-visible break-words rounded-md px-5 pt-0 pb-5 sm:w-[440px] md:w-[400px] lg:w-[480px] xl:w-[920px]">
         <div className="w-full flex-grow">
           {<DepartmentCard department={active} />}
         </div>
