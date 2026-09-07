@@ -286,6 +286,7 @@ function FooterLinks() {
             <a
               className="hover:underline"
               href="https://maps.app.goo.gl/qQAVLGGFnzMo721g6"
+              target="_blank"
             >
               {"Høgskoleringen 5, 7491 Trondheim"}
             </a>
