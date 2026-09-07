@@ -283,7 +283,12 @@ function FooterLinks() {
         <li className="flex place-items-center space-x-4">
           <MapPin size={40} />
           <div className="flex place-items-center space-x-2">
-            {"Høgskoleringen 5, 7491 Trondheim"}
+            <a 
+              className="hover:underline" 
+              href="https://maps.app.goo.gl/qQAVLGGFnzMo721g6"
+            >
+              {"Høgskoleringen 5, 7491 Trondheim"}
+            </a>
           </div>
         </li>
 
