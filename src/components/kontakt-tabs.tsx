@@ -51,6 +51,45 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
 
   if (result instanceof Error) return <span>{result.message}</span>;
 
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+
+  async function sendContactForm(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const name = formData.get("name") as string;
+    const replyTo = formData.get("email") as string;
+    const about = formData.get("about") as string;
+    const message = formData.get("message") as string;
+
+    try {
+      setSendStatus("sending");
+      const response = await fetch("http://localhost:8080/contact/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "replyTo": replyTo,
+          "receivingEmail": email,
+          "about": about,
+          "text": `Fra: ${name}\n\n${message}`
+        }),
+      });
+
+      if (!response.ok) {
+        console.log(response);
+        throw new Error("Could not send message");
+      }
+      
+      setSendStatus("success");
+    } catch (error) {
+      console.log(error);
+      setSendStatus("error");
+    }
+  }
+
   const {
     name,
     description,
@@ -85,7 +124,15 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           {address && (
             <div className="mt-2 flex gap-1 text-sm">
               <MapPin className="h-5 w-5 text-black" />
-              <span>{address}</span>
+              <span>
+                <a
+                  className="hover:underline"
+                  href="https://maps.app.goo.gl/qQAVLGGFnzMo721g6"
+                  target="_blank"
+                >
+                  {address}
+                </a>
+              </span>
             </div>
           )}
           {members && (
@@ -133,37 +180,42 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
             {`Kontakt styret i ${name}`}
           </div>
-          <form>
+          <form onSubmit={sendContactForm}>
             <div className="mt-7 mb-5 grid xl:grid-cols-2 xl:gap-6">
               <div className="mb-5 md:mb-0">
                 <Label htmlFor="name">{"Ditt navn"}</Label>
-                <Input placeholder="Skriv inn navn" required />
+                <Input id="name" name="name" placeholder="Skriv inn navn" required />
               </div>
               <div>
                 <Label htmlFor="email">{"Din e-post"}</Label>
-                <Input placeholder="Skriv inn epost" required />
+                <Input id="email" name="email" placeholder="Skriv inn epost" required />
               </div>
             </div>
             <div className="mb-5">
               <div>
                 <Label htmlFor="topic">{"Emne"}</Label>
-                <Input placeholder="Skriv inn emnet for meldingen" required />
+                <Input id="about" name="about" placeholder="Skriv inn emnet for meldingen" required />
               </div>
             </div>
             <div className="mb-5">
               <div>
                 <Label htmlFor="message">{"Melding"}</Label>
-                <Textarea
-                  placeholder="Skriv inn meldingen din"
-                  rows={6}
-                  required
-                  id="message"
-                />
+                <Textarea id="message" name="message" placeholder="Skriv inn meldingen din" rows={6} required/>
               </div>
             </div>
-            <Button className="bg-vektor-darkblue hover:bg-vektor-blue">
-              {"Send melding"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button type="submit" disabled={sendStatus === "sending"} className="bg-vektor-darkblue hover:bg-vektor-blue">
+                {sendStatus === "sending" ? "Sender..." : "Send melding"}
+              </Button>
+
+              {sendStatus === "success" && (
+                <p className="text-green-600">Sendt!</p>
+              )}
+
+              {sendStatus === "error" && (
+                <p className="text-red-600">Kunne ikke sende epost, prøv igjen senere.</p>
+              )}
+            </div>
           </form>
         </div>
       )}
