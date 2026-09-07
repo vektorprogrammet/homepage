@@ -287,6 +287,7 @@ function FooterLinks() {
               className="hover:underline"
               href="https://maps.app.goo.gl/qQAVLGGFnzMo721g6"
               target="_blank"
+              rel="noreferrer"
             >
               {"Høgskoleringen 5, 7491 Trondheim"}
             </a>
