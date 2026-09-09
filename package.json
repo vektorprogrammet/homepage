@@ -87,5 +87,11 @@
     "@types/react-dom": "^18.3.5",
     "vitest": "^3.1.1"
   },
-  "packageManager": "pnpm@12.3.4"
+  "packageManager": "pnpm@12.3.4",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild"
+    ]
+  }
 }
