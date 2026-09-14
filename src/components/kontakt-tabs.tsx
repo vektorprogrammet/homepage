@@ -76,7 +76,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           replyTo: replyTo,
           receivingEmail: email,
           about: about,
-          text: `Fra: ${name}\n\n${message}`
+          text: `Fra: ${name}\n\n${message}`,
         }),
       });
 
@@ -185,50 +185,50 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
             <div className="mt-7 mb-5 grid xl:grid-cols-2 xl:gap-6">
               <div className="mb-5 md:mb-0">
                 <Label htmlFor="name">{"Ditt navn"}</Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  placeholder="Skriv inn navn" 
-                  required 
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Skriv inn navn"
+                  required
                 />
               </div>
               <div>
                 <Label htmlFor="email">{"Din e-post"}</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  placeholder="Skriv inn epost" 
-                  required 
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="Skriv inn epost"
+                  required
                 />
               </div>
             </div>
             <div className="mb-5">
               <div>
                 <Label htmlFor="topic">{"Emne"}</Label>
-                <Input 
-                  id="about" 
-                  name="about" 
-                  placeholder="Skriv inn emnet for meldingen" 
-                  required 
+                <Input
+                  id="about"
+                  name="about"
+                  placeholder="Skriv inn emnet for meldingen"
+                  required
                 />
               </div>
             </div>
             <div className="mb-5">
               <div>
                 <Label htmlFor="message">{"Melding"}</Label>
-                <Textarea 
-                  id="message" 
-                  name="message" 
-                  placeholder="Skriv inn meldingen din" 
-                  rows={6} 
+                <Textarea
+                  id="message"
+                  name="message"
+                  placeholder="Skriv inn meldingen din"
+                  rows={6}
                   required
                 />
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Button 
-                type="submit" 
-                disabled={sendStatus === "sending"} 
+                type="submit"
+                disabled={sendStatus === "sending"}
                 className="bg-vektor-darkblue hover:bg-vektor-blue"
               >
                 {sendStatus === "sending" ? "Sender..." : "Send melding"}
