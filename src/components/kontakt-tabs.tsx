@@ -1,5 +1,5 @@
 import { Mail, MapPin, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { info } from "~/api/kontakt";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
@@ -47,13 +47,13 @@ export function ContactTabs({ department }: { department: DepartmentPretty }) {
 }
 
 function DepartmentCard({ department }: { department: DepartmentPretty }) {
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+
   const result = info(department);
 
   if (result instanceof Error) return <span>{result.message}</span>;
 
-  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
-
-  async function sendContactForm(e: React.FormEvent<HTMLFormElement>) {
+  async function sendContactForm(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
@@ -79,13 +79,11 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
       });
 
       if (!response.ok) {
-        console.log(response);
         throw new Error("Could not send message");
       }
-      
+
       setSendStatus("success");
-    } catch (error) {
-      console.log(error);
+    } catch {
       setSendStatus("error");
     }
   }
