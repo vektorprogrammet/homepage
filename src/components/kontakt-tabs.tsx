@@ -226,7 +226,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button 
+              <Button
                 type="submit"
                 disabled={sendStatus === "sending"}
                 className="bg-vektor-darkblue hover:bg-vektor-blue"
