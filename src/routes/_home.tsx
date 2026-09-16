@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SiFacebook } from "@icons-pack/react-simple-icons";
 import { FolderOpen, Mail, MapPin } from "lucide-react";
-import { motion } from "motion/react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { motion, useIsomorphicLayoutEffect } from "motion/react";
+import { useRef, useState } from "react";
 import { Link, NavLink, Outlet, type To, useLocation } from "react-router";
 import { type Sponsor, getSponsors } from "~/api/sponsor";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -61,7 +61,7 @@ function NavTabs({ routes }: { routes: Array<{ name: string; path: To }> }) {
     width: number;
   } | null>(null);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -92,7 +92,7 @@ function NavTabs({ routes }: { routes: Array<{ name: string; path: To }> }) {
   return (
     <div
       ref={containerRef}
-      className="flew-row relative mx-auto flex h-11 rounded-full px-0.5"
+      className="relative mx-auto flex h-11 rounded-full px-0.5"
     >
       {indicator && (
         <motion.div
