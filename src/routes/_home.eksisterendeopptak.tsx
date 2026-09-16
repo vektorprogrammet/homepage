@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  ChevronsUpDown,
   Clock3,
   Eye,
   EyeOff,
@@ -31,8 +32,21 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -295,6 +309,12 @@ function getPotentialTeamsLabel(
   return potentialTeams.length > 0 ? potentialTeams.join(", ") : "Ingen valgt";
 }
 
+function getSchoolSelectionLabel(schools: Array<string>) {
+  if (schools.length === 0) return "Velg skoler";
+  if (schools.length === 1) return schools[0];
+  return `${schools.length} skoler valgt`;
+}
+
 function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
   const [selectedStudyYear, setSelectedStudyYear] = useState("");
   const [selectedDays, setSelectedDays] = useState<Array<string>>([]);
@@ -304,6 +324,7 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
     "Norsk",
   ]);
   const [preferredSchools, setPreferredSchools] = useState<Array<string>>([]);
+  const [schoolPickerOpen, setSchoolPickerOpen] = useState(false);
   const [teamInterest, setTeamInterest] = useState("");
   const [potentialTeams, setPotentialTeams] = useState<Array<string>>([]);
 
@@ -556,28 +577,73 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
               Det er valgfritt å sette preferanser for skoler. Vi prøver å ta
               hensyn til ønskene dine.
             </p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {schoolOptions.map((school) => (
-                <label key={school} className="relative cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="preferredSchool"
-                    value={school}
-                    checked={preferredSchools.includes(school)}
-                    onChange={() =>
-                      toggleListValue(school, setPreferredSchools)
-                    }
-                    className="peer sr-only"
+            {preferredSchools.map((school) => (
+              <input
+                key={school}
+                type="hidden"
+                name="preferredSchool"
+                value={school}
+              />
+            ))}
+            <Popover open={schoolPickerOpen} onOpenChange={setSchoolPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  aria-expanded={schoolPickerOpen}
+                  aria-label="Velg én eller flere foretrukne skoler"
+                  className="h-12 w-full max-w-xl justify-between rounded-lg border-2 border-gray-200 bg-gray-50 px-4 text-left font-normal text-base text-vektor-DARKblue hover:border-vektor-blue hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-800"
+                >
+                  <span className="truncate">
+                    {getSchoolSelectionLabel(preferredSchools)}
+                  </span>
+                  <ChevronsUpDown
+                    className="ml-2 h-4 w-4 shrink-0 opacity-50"
+                    aria-hidden="true"
                   />
-                  <span className="flex min-h-14 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-5 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue">
-                    {school}
-                  </span>
-                  <span className="pointer-events-none absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-vektor-darkblue text-white opacity-0 shadow-sm transition-opacity peer-checked:opacity-100 dark:bg-vektor-blue dark:text-vektor-DARKblue">
-                    <Check className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                </label>
-              ))}
-            </div>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                className="w-[--radix-popover-trigger-width] p-0"
+              >
+                <Command>
+                  <CommandInput placeholder="Søk etter skole" />
+                  <CommandList>
+                    <CommandEmpty>Fant ingen skole.</CommandEmpty>
+                    <CommandGroup>
+                      {schoolOptions.map((school) => {
+                        const isSelected = preferredSchools.includes(school);
+                        return (
+                          <CommandItem
+                            key={school}
+                            value={school}
+                            onSelect={() =>
+                              toggleListValue(school, setPreferredSchools)
+                            }
+                            aria-selected={isSelected}
+                            className="cursor-pointer"
+                          >
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-gray-300">
+                              <Check
+                                className={`h-4 w-4 ${isSelected ? "opacity-100" : "opacity-0"}`}
+                                aria-hidden="true"
+                              />
+                            </span>
+                            <span>{school}</span>
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {preferredSchools.length > 0 && (
+              <p className="text-gray-600 text-sm dark:text-gray-300">
+                Valgt: {preferredSchools.join(", ")}
+              </p>
+            )}
           </fieldset>
 
           <fieldset className="space-y-5">
