@@ -6,11 +6,20 @@ import {
   Clock3,
   Eye,
   EyeOff,
+  GraduationCap,
+  Languages,
   Layers3,
   LockKeyhole,
   Mail,
+  School,
+  UsersRound,
 } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import {
+  type Dispatch,
+  type FormEvent,
+  type SetStateAction,
+  useState,
+} from "react";
 import { Link } from "react-router";
 import { Divider } from "~/components/divider";
 import { Button } from "~/components/ui/button";
@@ -24,6 +33,13 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function ExistingRecordingLayout() {
@@ -183,20 +199,123 @@ export default function ExistingRecordingLayout() {
   );
 }
 
-const blockOptions = ["Blokk 1", "Blokk 2", "Begge blokker"];
+const studyYears = [
+  "1. studieår",
+  "2. studieår",
+  "3. studieår",
+  "4. studieår",
+  "5. studieår",
+];
+const blockOptions = ["Bolk 1", "Bolk 2", "Begge bolker"];
 const weekdays = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag"];
 const durationOptions = [
-  { value: "4", label: "4 uker" },
-  { value: "8", label: "8 uker" },
+  { value: "false", label: "4 uker" },
+  { value: "true", label: "8 uker" },
+];
+const languageOptions = ["Norsk", "Engelsk"];
+function fetchSchoolOptions() {
+  // Placeholder for API call to fetch active schools
+  return [
+    "BlussVoll",
+    "Charlottenlund",
+    "Birralee",
+    "Markaplassen",
+    "Nidaros idrettsungdomsskole",
+    "Rosenborg",
+    "Ugla",
+    "Trondheim idrettsungdomsskole",
+    "Sunnland",
+    "Lade",
+    "Sjetne",
+    "Hoeggen",
+  ];
+}
+const schoolOptions = fetchSchoolOptions();
+const teamOptions = [
+  "IT",
+  "Profilering",
+  "Rekruttering",
+  "Evaluering",
+  "Skolekoordinering",
+  "Sponsor",
+  "Økonomi",
+  "Sosialt",
+  "Styret",
 ];
 
+function isApplicationComplete(values: {
+  studyYear: string;
+  group: string;
+  days: Array<string>;
+  duration: string;
+  languages: Array<string>;
+  teamInterest: string;
+  potentialTeams: Array<string>;
+}) {
+  const requiredSelections = [
+    values.studyYear,
+    values.group,
+    values.duration,
+    values.teamInterest,
+  ];
+  const hasRequiredSelections = requiredSelections.every(Boolean);
+  const hasRequiredLists =
+    values.days.length > 0 && values.languages.length > 0;
+  const hasTeamSelection =
+    values.teamInterest === "no" || values.potentialTeams.length > 0;
+
+  return hasRequiredSelections && hasRequiredLists && hasTeamSelection;
+}
+
+function getStudyYearLabel(value: string) {
+  if (!value) return "Ikke valgt";
+  if (value === "6+") return "6. studieår eller mer";
+  return studyYears[Number(value) - 1];
+}
+
+function getDurationLabel(value: string) {
+  if (!value) return "Ikke valgt";
+  return value === "true" ? "8 uker" : "4 uker";
+}
+
+function getTeamInterestLabel(value: string) {
+  const labels: Record<string, string> = {
+    yes: "Ja",
+    maybe: "Kanskje",
+    no: "Nei",
+  };
+  return labels[value] ?? "Ikke valgt";
+}
+
+function getPotentialTeamsLabel(
+  teamInterest: string,
+  potentialTeams: Array<string>,
+) {
+  if (teamInterest === "no") return "Ikke aktuelt";
+  return potentialTeams.length > 0 ? potentialTeams.join(", ") : "Ingen valgt";
+}
+
 function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
+  const [selectedStudyYear, setSelectedStudyYear] = useState("");
   const [selectedDays, setSelectedDays] = useState<Array<string>>([]);
   const [selectedBlock, setSelectedBlock] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("");
+  const [selectedLanguages, setSelectedLanguages] = useState<Array<string>>([
+    "Norsk",
+  ]);
+  const [preferredSchools, setPreferredSchools] = useState<Array<string>>([]);
+  const [teamInterest, setTeamInterest] = useState("");
+  const [potentialTeams, setPotentialTeams] = useState<Array<string>>([]);
 
-  const isComplete =
-    selectedBlock !== "" && selectedDays.length > 0 && selectedDuration !== "";
+  const isComplete = isApplicationComplete({
+    studyYear: selectedStudyYear,
+    group: selectedBlock,
+    days: selectedDays,
+    duration: selectedDuration,
+    languages: selectedLanguages,
+    teamInterest,
+    potentialTeams,
+  });
 
   const toggleDay = (day: string) => {
     setSelectedDays((current) =>
@@ -204,6 +323,27 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
         ? current.filter((selectedDay) => selectedDay !== day)
         : [...current, day],
     );
+  };
+
+  const toggleListValue = (
+    value: string,
+    setter: Dispatch<SetStateAction<Array<string>>>,
+  ) => {
+    setter((current) =>
+      current.includes(value)
+        ? current.filter((selectedValue) => selectedValue !== value)
+        : [...current, value],
+    );
+  };
+
+  const selectDuration = (value: string) => {
+    setSelectedDuration(value);
+    if (value === "true") setSelectedBlock("Begge bolker");
+  };
+
+  const selectTeamInterest = (value: string) => {
+    setTeamInterest(value);
+    if (value === "no") setPotentialTeams([]);
   };
 
   return (
@@ -226,23 +366,56 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
           <fieldset className="space-y-4">
             <legend className="flex items-center gap-3 font-bold text-lg">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vektor-bg text-vektor-darkblue dark:bg-vektor-blue/15 dark:text-vektor-blue">
+                <GraduationCap className="h-5 w-5" aria-hidden="true" />
+              </span>
+              Hvilket studieår er du i?
+            </legend>
+            <input type="hidden" name="yearOfStudy" value={selectedStudyYear} />
+            <Select
+              value={selectedStudyYear}
+              onValueChange={setSelectedStudyYear}
+              required
+            >
+              <SelectTrigger
+                id="yearOfStudy"
+                aria-label="Studieår"
+                className="h-12 w-full max-w-md rounded-lg border-2 border-gray-200 bg-gray-50 text-base focus:ring-vektor-blue dark:border-gray-700 dark:bg-gray-800"
+              >
+                <SelectValue placeholder="Velg studieår" />
+              </SelectTrigger>
+              <SelectContent>
+                {studyYears.map((year, index) => (
+                  <SelectItem key={year} value={String(index + 1)}>
+                    {year}
+                  </SelectItem>
+                ))}
+                <SelectItem value="6+">6. studieår eller mer</SelectItem>
+              </SelectContent>
+            </Select>
+          </fieldset>
+          <fieldset className="space-y-4">
+            <legend className="flex items-center gap-3 font-bold text-lg">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vektor-bg text-vektor-darkblue dark:bg-vektor-blue/15 dark:text-vektor-blue">
                 <Layers3 className="h-5 w-5" aria-hidden="true" />
               </span>
-              Hvilken blokk ønsker du?
+              Hvilken bolk ønsker du?
             </legend>
             <div className="grid gap-3 sm:grid-cols-3">
               {blockOptions.map((option) => (
                 <label key={option} className="relative cursor-pointer">
                   <input
                     type="radio"
-                    name="block"
+                    name="preferredGroup"
                     value={option}
                     checked={selectedBlock === option}
                     onChange={() => setSelectedBlock(option)}
+                    disabled={
+                      selectedDuration === "true" && option !== "Begge bolker"
+                    }
                     required
                     className="peer sr-only"
                   />
-                  <span className="flex min-h-16 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-10 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue">
+                  <span className="flex min-h-16 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-10 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 peer-disabled:cursor-not-allowed peer-disabled:opacity-40 peer-disabled:hover:border-gray-200 peer-disabled:hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue dark:peer-disabled:hover:border-gray-700 dark:peer-disabled:hover:bg-gray-800">
                     {option}
                   </span>
                   <span className="pointer-events-none absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-vektor-darkblue text-white opacity-0 shadow-sm transition-opacity peer-checked:opacity-100 dark:bg-vektor-blue dark:text-vektor-DARKblue">
@@ -274,7 +447,7 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
                 <label key={day} className="relative cursor-pointer">
                   <input
                     type="checkbox"
-                    name="availableDays"
+                    name="days"
                     value={day}
                     checked={selectedDays.includes(day)}
                     onChange={() => toggleDay(day)}
@@ -298,15 +471,21 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
               </span>
               Hvor lenge ønsker du å delta?
             </legend>
+            <p
+              id="duration-help"
+              className="text-gray-600 text-sm dark:text-gray-300"
+            >
+              Velger du 8 uker, låses valget til begge bolker.
+            </p>
             <div className="grid max-w-md gap-3 sm:grid-cols-2">
               {durationOptions.map(({ value, label }) => (
                 <label key={value} className="relative cursor-pointer">
                   <input
                     type="radio"
-                    name="duration"
+                    name="doublePosition"
                     value={value}
                     checked={selectedDuration === value}
-                    onChange={() => setSelectedDuration(value)}
+                    onChange={() => selectDuration(value)}
                     required
                     className="peer sr-only"
                   />
@@ -321,6 +500,148 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
             </div>
           </fieldset>
 
+          <fieldset className="space-y-4">
+            <legend className="flex items-center gap-3 font-bold text-lg">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vektor-bg text-vektor-darkblue dark:bg-vektor-blue/15 dark:text-vektor-blue">
+                <Languages className="h-5 w-5" aria-hidden="true" />
+              </span>
+              Hvilke språk kan du bruke på skolen?
+            </legend>
+            <p className="text-gray-600 text-sm dark:text-gray-300">
+              Norsk er påkrevd. Velg eventuelt flere språk.
+            </p>
+            <input type="hidden" name="languages" value="Norsk" />
+            <div className="grid gap-3 sm:grid-cols-3">
+              {languageOptions.map((language) => (
+                <label
+                  key={language}
+                  className={`relative ${language === "Norsk" ? "cursor-default" : "cursor-pointer"}`}
+                  title={language === "Norsk" ? "Norsk er påkrevd" : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    name={language === "Norsk" ? undefined : "languages"}
+                    value={language}
+                    checked={selectedLanguages.includes(language)}
+                    disabled={language === "Norsk"}
+                    onChange={() =>
+                      toggleListValue(language, setSelectedLanguages)
+                    }
+                    className="peer sr-only"
+                  />
+                  <span className="flex min-h-14 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-7 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue">
+                    {language}
+                    {language === "Norsk" && (
+                      <span className="ml-2 font-medium text-xs opacity-70">
+                        Påkrevd
+                      </span>
+                    )}
+                  </span>
+                  <span className="pointer-events-none absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-vektor-darkblue text-white opacity-0 shadow-sm transition-opacity peer-checked:opacity-100 dark:bg-vektor-blue dark:text-vektor-DARKblue">
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-5">
+            <legend className="flex items-center gap-3 font-bold text-lg">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vektor-bg text-vektor-darkblue dark:bg-vektor-blue/15 dark:text-vektor-blue">
+                <School className="h-5 w-5" aria-hidden="true" />
+              </span>
+              Skoleønske
+            </legend>
+            <p className="text-gray-600 text-sm dark:text-gray-300">
+              Det er valgfritt å sette preferanser for skoler. Vi prøver å ta
+              hensyn til ønskene dine.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {schoolOptions.map((school) => (
+                <label key={school} className="relative cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="preferredSchool"
+                    value={school}
+                    checked={preferredSchools.includes(school)}
+                    onChange={() =>
+                      toggleListValue(school, setPreferredSchools)
+                    }
+                    className="peer sr-only"
+                  />
+                  <span className="flex min-h-14 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-5 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue">
+                    {school}
+                  </span>
+                  <span className="pointer-events-none absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-vektor-darkblue text-white opacity-0 shadow-sm transition-opacity peer-checked:opacity-100 dark:bg-vektor-blue dark:text-vektor-DARKblue">
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-5">
+            <legend className="flex items-center gap-3 font-bold text-lg">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vektor-bg text-vektor-darkblue dark:bg-vektor-blue/15 dark:text-vektor-blue">
+                <UsersRound className="h-5 w-5" aria-hidden="true" />
+              </span>
+              Interesse for team
+            </legend>
+            <div className="space-y-2">
+              <Label htmlFor="teamInterest" className="text-base">
+                Er du interessert i et teamverv?
+              </Label>
+              <Select
+                name="teamInterest"
+                value={teamInterest}
+                onValueChange={selectTeamInterest}
+                required
+              >
+                <SelectTrigger
+                  id="teamInterest"
+                  className="h-12 w-full max-w-md rounded-lg border-2 border-gray-200 bg-gray-50 text-base focus:ring-vektor-blue dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <SelectValue placeholder="Velg et alternativ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">Ja</SelectItem>
+                  <SelectItem value="maybe">Kanskje</SelectItem>
+                  <SelectItem value="no">Nei</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {teamInterest !== "" && teamInterest !== "no" && (
+              <div className="space-y-3">
+                <p className="font-semibold text-base">
+                  Hvilke team kan være aktuelle?
+                </p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {teamOptions.map((team) => (
+                    <label key={team} className="relative cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="potentialTeams"
+                        value={team}
+                        checked={potentialTeams.includes(team)}
+                        onChange={() =>
+                          toggleListValue(team, setPotentialTeams)
+                        }
+                        className="peer sr-only"
+                      />
+                      <span className="flex min-h-14 items-center justify-center rounded-xl border-2 border-gray-200 bg-gray-50 px-5 text-center font-semibold transition-all hover:border-vektor-blue hover:bg-vektor-bg/50 peer-checked:border-vektor-darkblue peer-checked:bg-vektor-bg peer-checked:text-vektor-DARKblue peer-checked:ring-4 peer-checked:ring-vektor-blue/35 peer-focus-visible:ring-4 peer-focus-visible:ring-vektor-blue/40 dark:border-gray-700 dark:bg-gray-800 dark:peer-checked:border-vektor-blue dark:peer-checked:bg-vektor-blue/15 dark:peer-checked:text-white dark:hover:border-vektor-blue">
+                        {team}
+                      </span>
+                      <span className="pointer-events-none absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-vektor-darkblue text-white opacity-0 shadow-sm transition-opacity peer-checked:opacity-100 dark:bg-vektor-blue dark:text-vektor-DARKblue">
+                        <Check className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </fieldset>
+
           <aside
             className="rounded-xl border border-vektor-blue bg-vektor-bg p-5 dark:bg-vektor-blue/10"
             aria-live="polite"
@@ -328,7 +649,11 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
             <p className="mb-3 font-bold text-vektor-DARKblue dark:text-white">
               Dine valg
             </p>
-            <div className="grid gap-3 text-sm sm:grid-cols-3">
+            <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+              <SelectionSummary
+                label="Studieår"
+                value={getStudyYearLabel(selectedStudyYear)}
+              />
               <SelectionSummary
                 label="Blokk"
                 value={selectedBlock || "Ikke valgt"}
@@ -343,9 +668,31 @@ function PreviousAssistantApplication({ onBack }: { onBack: () => void }) {
               />
               <SelectionSummary
                 label="Varighet"
+                value={getDurationLabel(selectedDuration)}
+              />
+              <SelectionSummary
+                label="Språk"
                 value={
-                  selectedDuration ? `${selectedDuration} uker` : "Ikke valgt"
+                  selectedLanguages.length > 0
+                    ? selectedLanguages.join(", ")
+                    : "Ingen valgt"
                 }
+              />
+              <SelectionSummary
+                label="Skole"
+                value={
+                  preferredSchools.length > 0
+                    ? preferredSchools.join(", ")
+                    : "Ingen preferanse"
+                }
+              />
+              <SelectionSummary
+                label="Teaminteresse"
+                value={getTeamInterestLabel(teamInterest)}
+              />
+              <SelectionSummary
+                label="Mulige team"
+                value={getPotentialTeamsLabel(teamInterest, potentialTeams)}
               />
             </div>
           </aside>
