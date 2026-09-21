@@ -23,7 +23,7 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
       className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row"
       role="tablist"
     >
-      <div className="md:absolute md:left-3 lg:left-12">
+      <div className="md:absolute md:left-3 lg:left-700">
         <TabMenu
           tabs={Object.values(departments)}
           activeTab={active}

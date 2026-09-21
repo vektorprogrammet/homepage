@@ -1,5 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
-import { useInView, useMotionValue, useSpring } from "motion/react";
+import { ChevronDown } from "lucide-react";
+import { motion, useInView, useMotionValue, useSpring } from "motion/react";
 import { useEffect, useRef } from "react";
 import { Link, type To, href } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -98,7 +99,7 @@ export default function mainPage() {
     <main className="flex-grow">
       {/* Use component when the rendered component needs no props */}
       {/* Getting the routes from the defined route file in pages */}
-      <div className="bg-vektor-index-blue md:flex md:h-[80vh] md:pt-14">
+      <div className="relative bg-vektor-index-blue md:flex md:h-[80vh] md:pt-14">
         {/*Upper start*/}
         <div className="flex w-full flex-col items-center text-center md:h-[26rem] md:w-1/2 md:p-8 lg:h-[31rem] xl:h-[35rem]">
           <img
@@ -126,9 +127,28 @@ export default function mainPage() {
             <Button variant="green">{"Les mer og bli assistent"}</Button>
           </Link>
         </div>
+        <a
+          href="#info-seksjon"
+          aria-label="Scroll til statistikk"
+          className="-translate-x-1/2 absolute bottom- left-1/2 hidden md:block"
+        >
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{
+              duration: 1.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          >
+            <ChevronDown className="h-10 w-12 text-black" />
+          </motion.div>
+        </a>
       </div>
       {/*Upper end*/}
-      <div className="info-background mb-0 flex max-w-full flex-row flex-wrap items-center justify-center gap-24 pt-72 pb-72 text-center md:mt-20 md:gap-40">
+      <div
+        id="info-seksjon"
+        className="info-background mb-0 flex max-w-full flex-row flex-wrap items-center justify-center gap-24 pt-72 pb-72 text-center md:mt-20 md:gap-40"
+      >
         {/*Middle start*/}
         {cards.map(({ number, title, text, route }) => (
           <div
