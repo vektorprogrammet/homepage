@@ -24,6 +24,7 @@ import {
 import { TabsContent } from "@/components/ui/tabs";
 import { Tabs } from "@radix-ui/react-tabs";
 import { useRef, useState } from "react";
+import { Link as RouterLink } from "react-router";
 import { getAssistenter } from "~/api/assistenter";
 import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
@@ -40,7 +41,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ArrowRight, CalendarDays, Check, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -236,8 +237,7 @@ export default function Assistenter() {
       <div className="mt-16 mb-8 font-bold text-3xl text-vektor-DARKblue dark:text-text-dark">
         {"Søk nå!"}
       </div>
-      <div className="mb-16 h-full s:w-[100%] md:w-[75%]" ref={cardElement}>
-        {" "}
+      <div className="mb-16 h-full w-full px-5" ref={cardElement}>
         <CityTabs city="Trondheim" />
       </div>
       <Divider />
@@ -270,20 +270,17 @@ function CityTabs({ city }: { city: CityPretty }) {
   const [active, setActive] = useState<CityPretty>(city);
 
   return (
-    <div
-      className="items-center justify-center sm:w-[100%] sm:min-w-[300px] md:w-auto"
-      role="tablist"
-    >
-      <div className="md:absolute md:left-10">
+    <div className="relative mx-auto w-full max-w-6xl" role="tablist">
+      <div className="mb-5 w-full lg:absolute lg:top-0 lg:left-0 lg:mb-0 lg:w-36">
         <TabMenu
-          className="w-full md:w-auto"
+          className="w-full"
           tabs={Object.values(cities)}
           activeTab={active}
           setActiveTab={setActive}
         />
       </div>
-      <div className="mx-auto flex w-[100%] max-w-[800px] items-center justify-center md:w-[70%]">
-        {<CityApplyCard city={active} />}
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
+        <CityApplyCard city={active} />
       </div>
     </div>
   );
@@ -296,29 +293,41 @@ function CityApplyCard({ city }: { city: CityPretty }) {
   const openNow = isApplicationOpen(city);
 
   return (
-    <Tabs value={city} className="space-y- w-[300px] md:w-[90%]">
-      <TabsContent value={city} key={city} className="">
-        <Card className="bg-vektor-darkblue">
-          <CardHeader className=" text-white">
-            <CardTitle className="flex items-center justify-center">
-              {city}
+    <Tabs value={city} className="w-full">
+      <TabsContent value={city} key={city} className="mt-0">
+        <Card className="overflow-hidden border-0 bg-vektor-darkblue text-white shadow-[0_20px_55px_-24px_rgba(2,35,70,0.7)]">
+          <div className="h-2 bg-vektor-blue" aria-hidden="true" />
+          <CardHeader className="space-y-3 px-5 pt-8 text-center sm:px-8 sm:pt-10">
+            <p className="font-semibold text-sm text-vektor-blue uppercase tracking-[0.16em]">
+              Ny søknad
+            </p>
+            <CardTitle className="text-2xl text-white md:text-3xl">
+              Vektorassistent i {city}
             </CardTitle>
           </CardHeader>
           {openNow /* CardContent when the application period for the current city is closed */ ? (
             <>
-              <CardDescription className="mb-5 flex items-center justify-center text-lg text-white md:text-xl">
-                {/* Replace ??? with a real deadline when connecting to database */}
-                Søknadsfrist: ???
+              <CardDescription className="mx-auto mb-7 flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/80 md:text-base">
+                <CalendarDays className="h-4 w-4 text-vektor-blue" />
+                Søknadsfrist publiseres snart
               </CardDescription>
-              <CardContent className=" space-y-3 text-white">
-                <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <Label htmlFor="fornavn">Fornavn</Label>
+              <CardContent className="px-5 pb-8 text-white sm:px-8">
+                <form
+                  id="assistant-application-form"
+                  className="grid gap-5 sm:grid-cols-2"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="fornavn" className="text-base text-white">
+                      Fornavn
+                    </Label>
                     <Input
-                      className="text-black"
                       id="fornavn"
+                      name="firstName"
+                      autoComplete="given-name"
                       placeholder="Ola"
                       maxLength={100}
+                      required
+                      className="h-12 rounded-lg border-white/15 bg-white text-base text-gray-950 placeholder:text-gray-500 focus-visible:ring-vektor-blue"
                       onChange={(e) => {
                         const cleanedValue = e.target.value.replace(
                           /[^a-zA-ZæøåÆØÅ\s-]/g,
@@ -328,13 +337,18 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       }}
                     />
                   </div>
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <Label htmlFor="etternavn">Etternavn</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="etternavn" className="text-base text-white">
+                      Etternavn
+                    </Label>
                     <Input
                       id="etternavn"
-                      className="text-black"
+                      name="lastName"
+                      autoComplete="family-name"
                       placeholder="Nordmann"
                       maxLength={100}
+                      required
+                      className="h-12 rounded-lg border-white/15 bg-white text-base text-gray-950 placeholder:text-gray-500 focus-visible:ring-vektor-blue"
                       onChange={(e) => {
                         const cleanedValue = e.target.value.replace(
                           /[^a-zA-ZæøåÆØÅ\s-]/g,
@@ -344,15 +358,19 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       }}
                     />
                   </div>
-                </div>
-                <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <Label htmlFor="email">E-post</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-base text-white">
+                      E-post
+                    </Label>
                     <Input
                       id="email"
-                      placeholder="Skriv inn epost"
-                      className="text-black"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="navn@eksempel.no"
                       maxLength={100}
+                      required
+                      className="h-12 rounded-lg border-white/15 bg-white text-base text-gray-950 placeholder:text-gray-500 focus-visible:ring-vektor-blue"
                       onChange={(e) => {
                         const cleanedValue = e.target.value.replace(
                           /[^a-zA-Z0-9@._-]/g, // allows letters, numbers, @, dot, underscore, and dash
@@ -362,13 +380,20 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       }}
                     />
                   </div>
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <Label htmlFor="phone">Telefonnummer</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-base text-white">
+                      Telefonnummer
+                    </Label>
                     <Input
                       id="phone"
-                      placeholder="Skriv inn telefonnummer"
-                      className="text-black"
+                      name="phone"
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      placeholder="12345678"
                       maxLength={8}
+                      required
+                      className="h-12 rounded-lg border-white/15 bg-white text-base text-gray-950 placeholder:text-gray-500 focus-visible:ring-vektor-blue"
                       onChange={(e) => {
                         const cleanedValue = e.target.value.replace(
                           /[^0-9]/g,
@@ -378,16 +403,18 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       }}
                     />
                   </div>
-                </div>
-                <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <Label htmlFor="fornavn">Studieretning</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="study" className="text-base text-white">
+                      Studieretning
+                    </Label>
                     <Popover open={open} onOpenChange={setOpen}>
                       <PopoverTrigger asChild>
                         <Button
+                          id="study"
+                          type="button"
                           variant="outline"
                           aria-expanded={open}
-                          className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="h-12 w-full justify-between rounded-lg border-white/15 bg-white px-3 font-normal text-gray-950 text-sm hover:bg-gray-50 hover:text-gray-950 focus-visible:ring-vektor-blue"
                         >
                           {value
                             ? studies.find((studies) => studies.value === value)
@@ -396,14 +423,13 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-full">
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                         <Command>
-                          <CommandInput
-                            placeholder="Finn studiekode"
-                            className=""
-                          />
+                          <CommandInput placeholder="Finn studieretning" />
                           <CommandList>
-                            <CommandEmpty>Studiekode ikke funnet.</CommandEmpty>
+                            <CommandEmpty>
+                              Fant ikke studieretningen.
+                            </CommandEmpty>
                             <CommandGroup>
                               {studies.map((studies) => (
                                 <CommandItem
@@ -434,69 +460,78 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="w-full space-y-1 md:w-1/2">
-                    <div className="flex w-full flex-col md:flex-row md:space-x-4">
-                      <div className="w-full space-y-1 md:w-1/2">
-                        <Label htmlFor="gender">Kjønn</Label>
-                        <Select>
-                          <SelectTrigger className="w-full text-black">
-                            <SelectValue
-                              className="w-full"
-                              placeholder="Velg kjønn"
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="male">Mann</SelectItem>
-                            <SelectItem value="female">Kvinne</SelectItem>
-                            <SelectItem value="other">Annet</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="w-full space-y-1 md:w-1/2">
-                        <Label htmlFor="grade">Årstrinn</Label>
-                        <Select>
-                          <SelectTrigger className="w-full text-black">
-                            <SelectValue
-                              className="w-full text-black"
-                              placeholder="Velg årstrinn"
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="firstGrade">
-                              1. klasse
-                            </SelectItem>
-                            <SelectItem value="secondGrade">
-                              2. klasse
-                            </SelectItem>
-                            <SelectItem value="thirdGrade">
-                              3. klasse
-                            </SelectItem>
-                            <SelectItem value="fourthGrade">
-                              4. klasse
-                            </SelectItem>
-                            <SelectItem value="fifthGrade">
-                              5. klasse
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender" className="text-base text-white">
+                      Kjønn
+                    </Label>
+                    <Select name="gender">
+                      <SelectTrigger
+                        id="gender"
+                        className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
+                      >
+                        <SelectValue placeholder="Velg kjønn" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Mann</SelectItem>
+                        <SelectItem value="female">Kvinne</SelectItem>
+                        <SelectItem value="other">Annet</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
+                  <div className="space-y-2 sm:col-span-2 sm:max-w-[calc(50%-0.625rem)]">
+                    <Label htmlFor="grade" className="text-base text-white">
+                      Årstrinn
+                    </Label>
+                    <Select name="grade">
+                      <SelectTrigger
+                        id="grade"
+                        className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
+                      >
+                        <SelectValue placeholder="Velg årstrinn" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="firstGrade">1. klasse</SelectItem>
+                        <SelectItem value="secondGrade">2. klasse</SelectItem>
+                        <SelectItem value="thirdGrade">3. klasse</SelectItem>
+                        <SelectItem value="fourthGrade">4. klasse</SelectItem>
+                        <SelectItem value="fifthGrade">5. klasse</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </form>
               </CardContent>
-              <CardFooter className="flex justify-end text-white">
+              <CardFooter className="flex flex-col items-center border-white/10 border-t bg-black/10 px-5 py-6 text-white sm:px-8">
                 <Button
+                  type="submit"
+                  form="assistant-application-form"
                   variant="green"
-                  className="w-[100%] md:w-[48%] lg:w-[22.5%]"
+                  className="group h-12 w-full rounded-lg font-semibold shadow-black/15 shadow-lg sm:w-auto sm:min-w-56"
                 >
-                  Søk nå!
+                  Send søknad
+                  <ArrowRight
+                    className="transition-transform group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
                 </Button>
+                <p className="mt-5 text-center text-sm text-white/75 sm:text-base">
+                  Har du vært vektorassistent tidligere?{" "}
+                  <RouterLink
+                    to="/eksisterendeopptak"
+                    className="font-semibold text-vektor-blue underline-offset-4 hover:underline"
+                  >
+                    Logg inn for å søke på nytt
+                  </RouterLink>
+                  .
+                </p>
               </CardFooter>
             </>
           ) : (
             /* CardContent when the application period for the current city is closed */
-            <CardContent className="mb-5 w-full text-white">
-              <p className="mx-auto text-center text-lg sm:w-9/10 md:w-4/5 md:text-xl">
+            <CardContent className="flex w-full flex-col items-center px-5 pt-2 pb-10 text-white sm:px-8">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-vektor-blue/20 text-vektor-blue">
+                <CalendarDays className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <p className="mx-auto max-w-xl text-center text-base text-white/80 md:text-lg">
                 Søknadsperioden for {city} er dessverre stengt for semesteret.
                 Vennligst kom tilbake senere for oppdateringer om fremtidige
                 søknadsperioder.
