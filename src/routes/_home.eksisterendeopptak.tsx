@@ -254,7 +254,7 @@ const teamOptions = [
   "Sponsor",
   "Økonomi",
   "Sosialt",
-  "Styret",
+  "Ekspansjon",
 ];
 
 function isApplicationComplete(values: {
