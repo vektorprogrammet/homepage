@@ -99,7 +99,7 @@ export default function mainPage() {
     <main className="flex-grow">
       {/* Use component when the rendered component needs no props */}
       {/* Getting the routes from the defined route file in pages */}
-      <div className="relative bg-vektor-index-blue md:flex md:h-[80vh] md:pt-14">
+      <div className="relative bg-vektor-index-blue pb-20 md:flex md:h-[80vh] md:pt-14 md:pb-0">
         {/*Upper start*/}
         <div className="flex w-full flex-col items-center text-center md:h-[26rem] md:w-1/2 md:p-8 lg:h-[31rem] xl:h-[35rem]">
           <img
@@ -127,10 +127,15 @@ export default function mainPage() {
             <Button variant="green">{"Les mer og bli assistent"}</Button>
           </Link>
         </div>
-        <a
-          href="#info-seksjon"
+        <button
+          type="button"
           aria-label="Scroll til statistikk"
-          className="-translate-x-1/2 absolute bottom- left-1/2 hidden md:block"
+          onClick={() => {
+            document
+              .getElementById("info-seksjon")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="-translate-x-1/2 absolute bottom-4 left-1/2 p-2"
         >
           <motion.div
             animate={{ y: [0, 10, 0] }}
@@ -142,12 +147,12 @@ export default function mainPage() {
           >
             <ChevronDown className="h-10 w-12 text-black" />
           </motion.div>
-        </a>
+        </button>
       </div>
       {/*Upper end*/}
       <div
         id="info-seksjon"
-        className="info-background mb-0 flex max-w-full flex-row flex-wrap items-center justify-center gap-24 pt-72 pb-72 text-center md:mt-20 md:gap-40"
+        className="info-background mb-0 flex max-w-full scroll-mt-14 flex-row flex-wrap items-center justify-center gap-24 pt-72 pb-72 text-center md:mt-20 md:gap-40"
       >
         {/*Middle start*/}
         {cards.map(({ number, title, text, route }) => (
