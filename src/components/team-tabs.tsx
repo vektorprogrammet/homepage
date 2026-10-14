@@ -1,8 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { Mail, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, type To } from "react-router";
 import { getTeamOptions } from "~/api/queries/team-queries";
-import { useQuery } from "@tanstack/react-query";
 import { teamsHovedstyret } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
@@ -85,7 +85,7 @@ function HovedstyretTab() {
 
 function TeamTab({ team }: { team: CityPretty }) {
   const { data } = useQuery(getTeamOptions());
-  const overviews = data.filter((overview) => (overview.department === team));
+  const overviews = data.filter((overview) => overview.department === team);
 
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
