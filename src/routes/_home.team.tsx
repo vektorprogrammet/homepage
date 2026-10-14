@@ -8,7 +8,32 @@ import { getTeamFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 
 import { Outlet, useLocation } from "react-router";
-import { getTeam } from "~/api/team";
+
+type TeamPageInfo = {
+  title: string,
+  text1: string,
+  text2: string,
+  text3: string,
+  image: {
+    url: URL,
+    alt: string,
+  };
+  sectionTitle: string,
+}
+
+function getTeam(): TeamPageInfo {
+  return {
+    title: "Styre og team",
+    text1: "Vektorprogrammet er en stor organisasjon med assistenter i 4 norske byer. Vi trenger derfor mange frivillige bak kulissene som kan få hjulene til å gå rundt. Uten Vektorprogrammets 15 team hadde dette aldri gått an! ",
+    text2: "Kunne du tenkt deg et team-verv hos oss?",
+    text3: "Les mer om de ulike teamene nedenfor!",
+    image: {
+      url: new URL("https://vektorprogrammet.no/images/departments_map.png"),
+      alt: "Team",
+    },
+    sectionTitle: "Våre team"
+  };
+}
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team() {
@@ -26,14 +51,14 @@ export default function Team() {
       <header className="mx-auto flex w-full flex-wrap justify-around">
         <div className="mt-5 flex max-w-6xl flex-col">
           <h2 className="mx-3 font-bold text-4xl text-gray-600 dark:text-gray-200">
-            {teamInfo.card.title}
+            {teamInfo.title}
           </h2>
           <div className="mx-3 mt-4 mb-20 max-w-md text-xl dark:text-gray-300">
-            <span className="mb-4">{teamInfo.card.text1}</span>
-            {teamInfo.card.text2}
+            <span className="mb-4">{teamInfo.text1}</span>
+            {teamInfo.text2}
             {!isTeamApplicationPage && (
               <div className="mt-6">
-                <strong>{teamInfo.card.text3}</strong>
+                <strong>{teamInfo.text3}</strong>
               </div>
             )}
           </div>
@@ -51,15 +76,15 @@ export default function Team() {
             </svg>
           </div>
           <img
-            src={teamInfo.card.image.url.href}
-            alt={teamInfo.card.image.alt}
+            src={teamInfo.image.url.href}
+            alt={teamInfo.image.alt}
             className="mx-auto mr-25 max-h-80 w-auto max-w-full object-contain"
           />
         </div>
       </header>
       {!isTeamApplicationPage && (
         <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
-          {teamInfo.title}
+          {teamInfo.sectionTitle}
         </h1>
       )}
       <Outlet />

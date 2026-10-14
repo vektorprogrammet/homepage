@@ -1,12 +1,9 @@
 import { Mail, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, type To } from "react-router";
-import {
-  teamsAas,
-  teamsBergen,
-  teamsHovedstyret,
-  teamsTrondheim,
-} from "~/api/team";
+import { getTeamOptions } from "~/api/queries/team-queries";
+import { useQuery } from "@tanstack/react-query";
+import { teamsHovedstyret } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import {
@@ -87,24 +84,20 @@ function HovedstyretTab() {
 }
 
 function TeamTab({ team }: { team: CityPretty }) {
-  const teams =
-    team === "Bergen"
-      ? teamsBergen()
-      : team === "Ås"
-        ? teamsAas()
-        : teamsTrondheim();
+  const { data } = useQuery(getTeamOptions());
+  const overviews = data.filter((overview) => (overview.department === team));
 
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
-      {teams.map((team) => (
+      {overviews.map((overview) => (
         <Division
-          key={team.mail}
-          title={team.title}
-          text={team.text}
-          mail={team.mail}
-          numberOfMembers={team.numberOfMembers}
+          key={overview.team.id}
+          title={overview.team.name}
+          text={overview.team.shortDescription}
+          mail={overview.team.email}
+          numberOfMembers={overview.memberCount}
           buttonName="Les mer"
-          url={team.url}
+          url={`${overview.department}/${overview.team.name}/`}
         />
       ))}
     </div>
