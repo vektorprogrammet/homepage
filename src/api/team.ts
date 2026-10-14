@@ -12,9 +12,9 @@ type Team = {
   deadline: Date;
 };
 
-type TeamOverview = {
+export type TeamOverview = {
   team: Team;
-  department: string;
+  departmentCity: string;
   memberCount: number;
 };
 

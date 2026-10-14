@@ -3,17 +3,14 @@ import { Mail, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, type To } from "react-router";
 import { getTeamOptions } from "~/api/queries/team-queries";
-import { teamsHovedstyret } from "~/api/team";
+import type { TeamOverview } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import {
-  type CityPretty,
-  type DepartmentPretty,
-  departments,
-} from "~/lib/types";
+import { type DepartmentPretty, departments } from "~/lib/types";
 
 export function TeamTabs({ department }: { department: DepartmentPretty }) {
-  const [active, setActive] = useState<DepartmentPretty>(department);
+  const [activeTab, setActive] = useState<DepartmentPretty>(department);
+  const { data: teamOverviews } = useQuery(getTeamOptions());
 
   return (
     <div
@@ -23,59 +20,68 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
       <div className="md:absolute md:left-3 lg:left-12">
         <TabMenu
           tabs={Object.values(departments)}
-          activeTab={active}
+          activeTab={activeTab}
           setActiveTab={setActive}
         />
       </div>
       <div className="flex w-full max-w-5xl flex-col items-start">
-        {active === "Hovedstyret" ? (
-          <HovedstyretTab />
+        {activeTab === "Hovedstyret" ? (
+          <HovedstyretTab
+            overview={teamOverviews.find(
+              (teamOverview) => teamOverview.team.name === "Hovedstyret",
+            )}
+          />
         ) : (
-          <TeamTab team={active} />
+          <TeamTab
+            overviews={teamOverviews.filter(
+              (teamOverview) =>
+                teamOverview.departmentCity === activeTab &&
+                teamOverview.team.name !== "Hovedstyret",
+            )}
+          />
         )}
       </div>
     </div>
   );
 }
 
-function HovedstyretTab() {
-  const team = teamsHovedstyret();
+function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
   return (
     <div className="flex flex-col md:ml-24 md:max-w-2xl md:flex-row lg:ml-16 xl:ml-auto">
       <div className="flex-1 object-contain">
         <h2 className="font-bold text-2xl text-gray-600 sm:text-4xl dark:text-gray-200">
-          {team.title}
+          {overview?.team.name ?? "Hovedstyret"}
         </h2>
         <p className="mt-4 mb-4 text-md sm:text-lg dark:text-gray-300">
-          {team.text}
+          {overview?.team.shortDescription}
         </p>
         <div className="flex items-center space-x-1">
           <Mail className="h-5 w-5 text-black" />
           <a
             className="truncate text-sm hover:underline dark:text-white"
-            href={`mailto:${team.email}`}
+            href={`mailto:${overview?.team.email}`}
           >
-            <span>{team.email}</span>
+            <span>{overview?.team.email}</span>
           </a>
         </div>
         <div className="mt-2 flex items-center space-x-1">
           <Users className="h-5 w-5 text-black" />
-          <span>{`${team.numberOfMembers} medlemmer`}</span>
+          <span>{`${overview?.memberCount ?? "???"} medlemmer`}</span>
         </div>
         <br />
         <NavLink
           type="button"
-          to={team.url}
+          to={`/team/${overview?.team.name.toLowerCase()}`}
           className="rounded border border-blue-500 bg-transparent px-4 py-2 font-semibold text-blue-700 transition duration-300 hover:border-transparent hover:bg-blue-500 hover:text-white dark:bg-vektor-darkblue dark:text-white dark:hover:bg-blue-600"
           prefetch="intent"
         >
-          {team.buttonName}
+          Les mer
         </NavLink>
       </div>
       <div className="mt-6 flex max-h-80 items-center justify-center md:col-span-1 md:mt-auto md:p-4">
         <img
-          src={team.image.src}
-          alt={team.image.alt}
+          src={"https://vektorprogrammet.no/images/HS_22.jpg"}
+          alt={overview?.team.name}
           className="max-h-80 object-contain"
         />
       </div>
@@ -83,10 +89,7 @@ function HovedstyretTab() {
   );
 }
 
-function TeamTab({ team }: { team: CityPretty }) {
-  const { data } = useQuery(getTeamOptions());
-  const overviews = data.filter((overview) => overview.department === team);
-
+function TeamTab({ overviews }: { overviews: Array<TeamOverview> }) {
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {overviews.map((overview) => (
@@ -97,7 +100,7 @@ function TeamTab({ team }: { team: CityPretty }) {
           mail={overview.team.email}
           numberOfMembers={overview.memberCount}
           buttonName="Les mer"
-          url={`${overview.department}/${overview.team.name}/`}
+          url={`/team/${overview.departmentCity === "Ås" ? "aas" : overview.departmentCity}/${overview.team.name === "Økonomi" ? "okonomi" : overview.team.name}`.toLowerCase()}
         />
       ))}
     </div>
