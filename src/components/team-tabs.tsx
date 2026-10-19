@@ -80,7 +80,7 @@ function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
       </div>
       <div className="mt-6 flex max-h-80 items-center justify-center md:col-span-1 md:mt-auto md:p-4">
         <img
-          src={"https://vektorprogrammet.no/images/HS_22.jpg"}
+          src={"https://vektorprogrammet.no/images/HS_24.jpg"}
           alt={overview?.team.name}
           className="max-h-80 object-contain"
         />
