@@ -13,6 +13,8 @@ interface KontaktContent {
   card: KontaktCard;
 }
 
+const HOVEDSTYRE_TEAM_ID = 1; // Hard coded Hovedstyret id in table to be 1
+
 export function getKontakt(): KontaktContent {
   return {
     title: "Kontakt oss",
@@ -132,76 +134,44 @@ function infoBergen(): TeamInfo {
   };
 }
 
-type User = {
-  id: string,
-  firstName: string,
-  lastName: string,
-  fieldOfStudyId: number,
-  bankAccountNumber: string,
-  personalEmail: string,
-  phoneNumber: string,
-  profilePictureUrl: string,
-  companyEmail: string,
-}
-
-export type hovedstyreMemberOverview = {
-  user: User;
-}
+export type HovedstyreMemberOverview = {
+  name: string;
+  title: string;
+  mail: string;
+};
 
 export async function fetchHovedstyreMemberDetails(): Promise<Array<hovedstyreMemberOverview>> {
-  const response = await fetch("http://localhost:8080/users")
+  const response = await fetch(`http://localhost:8080/users/team-members/teamId/${HOVEDSTYRE_TEAM_ID}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Hovedstyre: ${response.status}`);
+  }
+
+  const users: {
+    firstName: string;
+    lastName: string;
+    teamUserRoleName: string;
+    companyEmail: string | null;
+  }[] = await response.json();
+
+  return users.map((user) => ({
+    name: `${user.firstName} ${user.lastName}`,
+    title: user.teamUserRoleName,
+    mail: user.companyEmail ?? "",
+  }));
 }
 
-function infoHovedstyret(): TeamInfo {
+async function infoHovedstyret(): Promise<TeamInfo> {
+  const contacts = await fetchHovedstyreMemberDetails();
+
   return {
     name: "Hovedstyret",
     description:
       "Hovedstyret er det nasjonale styret i vektorprogrammet. De er et overordnet organ med ansvar for drifting av hele organisasjonen.",
     email: "hovedstyret@vektorprogrammet.no",
-    members: 8,
+    members: contacts.length,
     button: true,
-    contacts: [
-      {
-        name: "Inga Bordal",
-        title: "Leder",
-        mail: "inga.bordal@vektorprogrammet.no",
-      },
-      {
-        name: "Emma Dyvesveen Myrbekk",
-        title: "Nestleder",
-        mail: "emma.dyvesveen@vektorprogrammet.no",
-      },
-      {
-        name: "Andreas Hope Pedersen",
-        title: "Ekspansjon",
-        mail: "andreas.pedersen@vektorprogrammet.no",
-      },
-      {
-        name: "Erlend Marius Ommundsen",
-        title: "IT-ansvarlig",
-        mail: "erlend.marius@vektorprogrammet.no",
-      },
-      {
-        name: "David Ramsvik",
-        title: "Mentor",
-        mail: "david@vektorprogrammet.no",
-      },
-      {
-        name: "Ingeborg Eldevik Rusaas",
-        title: "Profilering",
-        mail: "ingeborg.eldevik@vektorprogrammet.no",
-      },
-      {
-        name: "Adrian Larsen",
-        title: "Sponsor",
-        mail: "adrian@vektorprogrammet.no",
-      },
-      {
-        name: "Odin Nilsen",
-        title: "Økonomi",
-        mail: "odin@vektorprogrammet.no",
-      },
-    ],
+    contacts,
     openForContact: true,
   };
 }
