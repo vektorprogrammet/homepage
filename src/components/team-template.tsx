@@ -17,7 +17,7 @@ export function TeamTemplate({
 }) {
   return (
     <div>
-      <h1 className="mt-10 text-center font-bold text-4xl text-vektor-darblue">
+      <h1 className="text-center font-bold text-4xl text-vektor-darblue">
         {name}
       </h1>
       <div className="mt-5 text-center font-bold text-base text-vektor-darblue">
