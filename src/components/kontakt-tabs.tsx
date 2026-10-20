@@ -1,6 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, Users } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { info } from "~/api/kontakt";
+import { getHovedstyreMemberOptions } from "~/api/queries/kontakt-queries";
+import { getTeamOptions } from "~/api/queries/team-queries";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -51,6 +54,27 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     "idle" | "sending" | "success" | "error"
   >("idle");
 
+  const { data: teamOverviews } = useQuery({
+    ...getTeamOptions(),
+    enabled: department === "Hovedstyret",
+  });
+
+  const hovedstyre = teamOverviews.find(
+    (overview) => overview.team.name === "Hovedstyret",
+  );
+
+  const teamId =
+    hovedstyre === undefined ? undefined : Number(hovedstyre.team.id);
+
+  const {
+    data: hovedstyreMembers,
+    isPending: membersPending,
+    isError: membersError,
+  } = useQuery({
+    ...getHovedstyreMemberOptions(teamId),
+    enabled: department === "Hovedstyret" && teamId !== undefined,
+  });
+
   const result = info(department);
 
   if (result instanceof Error) return <span>{result.message}</span>;
@@ -95,11 +119,19 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     description,
     email,
     address,
-    members,
     button,
-    contacts,
     openForContact,
   } = result;
+
+  const contacts =
+    department === "Hovedstyret"
+      ? hovedstyreMembers
+      : result.contacts;
+
+  const members =
+    department === "Hovedstyret"
+      ? hovedstyreMembers.length
+      : result.members;
 
   return (
     <>
@@ -151,6 +183,13 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           )}
         </div>
         <div className="min-w-0 divide-y divide-solid">
+          {department === "Hovedstyret" && membersPending && (
+            <p>Laster medlemmer...</p>
+          )}
+
+          {department === "Hovedstyret" && membersError && (
+            <p>Kunne ikke hente medlemmene.</p>
+          )}
           {contacts.map((contact) => {
             return (
               <div className="mb-3 md:mb-4" key={contact.name}>

@@ -13,8 +13,6 @@ interface KontaktContent {
   card: KontaktCard;
 }
 
-const HOVEDSTYRE_TEAM_ID = 1; // Hard coded Hovedstyret id in table to be 1
-
 export function getKontakt(): KontaktContent {
   return {
     title: "Kontakt oss",
@@ -140,8 +138,12 @@ export type HovedstyreMemberOverview = {
   mail: string;
 };
 
-export async function fetchHovedstyreMemberDetails(): Promise<Array<hovedstyreMemberOverview>> {
-  const response = await fetch(`http://localhost:8080/users/team-members/teamId/${HOVEDSTYRE_TEAM_ID}`);
+export async function fetchHovedstyreMemberDetails(
+  teamId: number,
+): Promise<HovedstyreMemberOverview[]> {
+  const response = await fetch(
+    `http://localhost:8080/users/team-members/teamId/${teamId}`,
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch Hovedstyre: ${response.status}`);
@@ -161,17 +163,15 @@ export async function fetchHovedstyreMemberDetails(): Promise<Array<hovedstyreMe
   }));
 }
 
-async function infoHovedstyret(): Promise<TeamInfo> {
-  const contacts = await fetchHovedstyreMemberDetails();
+function infoHovedstyret(): TeamInfo {
 
   return {
     name: "Hovedstyret",
     description:
       "Hovedstyret er det nasjonale styret i vektorprogrammet. De er et overordnet organ med ansvar for drifting av hele organisasjonen.",
     email: "hovedstyret@vektorprogrammet.no",
-    members: contacts.length,
     button: true,
-    contacts,
+    contacts: [],
     openForContact: true,
   };
 }
