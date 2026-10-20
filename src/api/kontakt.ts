@@ -132,6 +132,26 @@ function infoBergen(): TeamInfo {
   };
 }
 
+type User = {
+  id: string,
+  firstName: string,
+  lastName: string,
+  fieldOfStudyId: number,
+  bankAccountNumber: string,
+  personalEmail: string,
+  phoneNumber: string,
+  profilePictureUrl: string,
+  companyEmail: string,
+}
+
+export type hovedstyreMemberOverview = {
+  user: User;
+}
+
+export async function fetchHovedstyreMemberDetails(): Promise<Array<hovedstyreMemberOverview>> {
+  const response = await fetch("http://localhost:8080/users")
+}
+
 function infoHovedstyret(): TeamInfo {
   return {
     name: "Hovedstyret",
