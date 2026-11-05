@@ -18,7 +18,7 @@ export function getKontakt(): KontaktContent {
     title: "Kontakt oss",
     card: {
       title: "Organisasjonen",
-      text: "Vektorprogrammet er en stor organisasjon med assistenter i 3 norske byer. Under kan du kontakte vektorprogrammet i nærmeste by eller hovedstyret for generelle henvendelser.",
+      text: "Vektorprogrammet er en stor organisasjon med assistenter i 4 norske byer. Under kan du kontakte vektorprogrammet i nærmeste by eller hovedstyret for generelle henvendelser.",
       image: {
         url: new URL(
           "https://vektorprogrammet.no/images/organizationstructure.png",
