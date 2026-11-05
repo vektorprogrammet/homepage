@@ -132,56 +132,45 @@ function infoBergen(): TeamInfo {
   };
 }
 
+export type HovedstyreMemberOverview = {
+  name: string;
+  title: string;
+  mail: string;
+};
+
+export async function fetchHovedstyreMemberDetails():
+  Promise<HovedstyreMemberOverview[]> {
+  const response = await fetch(
+    "http://localhost:8080/teams/hovedstyret/contacts",
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Hovedstyret: ${response.status}`);
+  }
+
+  const members: {
+    firstName: string;
+    lastName: string;
+    mail: string | null;
+    title: string;
+  }[] = await response.json();
+
+  return members.map((member) => ({
+    name: `${member.firstName} ${member.lastName}`,
+    title: member.title,
+    mail: member.mail ?? "",
+  }));
+}
+
 function infoHovedstyret(): TeamInfo {
+
   return {
     name: "Hovedstyret",
     description:
       "Hovedstyret er det nasjonale styret i vektorprogrammet. De er et overordnet organ med ansvar for drifting av hele organisasjonen.",
     email: "hovedstyret@vektorprogrammet.no",
-    members: 8,
     button: true,
-    contacts: [
-      {
-        name: "Inga Bordal",
-        title: "Leder",
-        mail: "inga.bordal@vektorprogrammet.no",
-      },
-      {
-        name: "Emma Dyvesveen Myrbekk",
-        title: "Nestleder",
-        mail: "emma.dyvesveen@vektorprogrammet.no",
-      },
-      {
-        name: "Andreas Hope Pedersen",
-        title: "Ekspansjon",
-        mail: "andreas.pedersen@vektorprogrammet.no",
-      },
-      {
-        name: "Erlend Marius Ommundsen",
-        title: "IT-ansvarlig",
-        mail: "erlend.marius@vektorprogrammet.no",
-      },
-      {
-        name: "David Ramsvik",
-        title: "Mentor",
-        mail: "david@vektorprogrammet.no",
-      },
-      {
-        name: "Ingeborg Eldevik Rusaas",
-        title: "Profilering",
-        mail: "ingeborg.eldevik@vektorprogrammet.no",
-      },
-      {
-        name: "Adrian Larsen",
-        title: "Sponsor",
-        mail: "adrian@vektorprogrammet.no",
-      },
-      {
-        name: "Odin Nilsen",
-        title: "Økonomi",
-        mail: "odin@vektorprogrammet.no",
-      },
-    ],
+    contacts: [],
     openForContact: true,
   };
 }
