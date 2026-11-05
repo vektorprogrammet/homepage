@@ -5,7 +5,7 @@ type Team = {
   departmentId: number;
   name: string;
   email: string;
-  description: SectionBlock[];
+  description: Array<SectionBlock>;
   shortDescription: string;
   acceptApplication: boolean;
   active: boolean;

@@ -1,8 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import {
-  fetchFullTeam,
-  fetchTeamOverviews,
-} from "../team";
+import { fetchFullTeam, fetchTeamOverviews } from "../team";
 
 export function getTeamOptions() {
   return queryOptions({

@@ -2,7 +2,7 @@ export type SectionBlock = {
   type: "section";
   id: string;
   heading?: string;
-  content: SectionContent[];
+  content: Array<SectionContent>;
 };
 
 export type SectionContent =
@@ -27,5 +27,5 @@ export type ContentWithImagesBlock = {
   type: "contentWithImages";
   id: string;
   markdown?: string;
-  images: ImageBlock[];
+  images: Array<ImageBlock>;
 };
