@@ -70,7 +70,6 @@ export async function fetchFullTeam(
   }
 
   const data = await response.json();
-  console.log("Fetched full team:", data); // Log the fetched data for debugging
 
   return data;
 }
