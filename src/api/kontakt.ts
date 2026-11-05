@@ -138,28 +138,27 @@ export type HovedstyreMemberOverview = {
   mail: string;
 };
 
-export async function fetchHovedstyreMemberDetails(
-  teamId: number,
-): Promise<HovedstyreMemberOverview[]> {
+export async function fetchHovedstyreMemberDetails():
+  Promise<HovedstyreMemberOverview[]> {
   const response = await fetch(
-    `http://localhost:8080/users/team-members/teamId/${teamId}`,
+    "http://localhost:8080/teams/hovedstyret/contacts",
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch Hovedstyre: ${response.status}`);
+    throw new Error(`Failed to fetch Hovedstyret: ${response.status}`);
   }
 
-  const users: {
+  const members: {
     firstName: string;
     lastName: string;
-    teamUserRoleName: string;
-    companyEmail: string | null;
+    mail: string | null;
+    title: string;
   }[] = await response.json();
 
-  return users.map((user) => ({
-    name: `${user.firstName} ${user.lastName}`,
-    title: user.teamUserRoleName,
-    mail: user.companyEmail ?? "",
+  return members.map((member) => ({
+    name: `${member.firstName} ${member.lastName}`,
+    title: member.title,
+    mail: member.mail ?? "",
   }));
 }
 

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, Users } from "lucide-react";
 import { type FormEvent, useState } from "react";
+import { Link } from "react-router";
 import { info } from "~/api/kontakt";
 import { getHovedstyreMemberOptions } from "~/api/queries/kontakt-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
@@ -71,7 +72,7 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     isPending: membersPending,
     isError: membersError,
   } = useQuery({
-    ...getHovedstyreMemberOptions(teamId),
+    ...getHovedstyreMemberOptions(),
     enabled: department === "Hovedstyret" && teamId !== undefined,
   });
 
@@ -176,11 +177,17 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           )}
           {button && (
             <div className="py-5">
-              <Button className="bg-vektor-darkblue hover:bg-vektor-blue">
-                {"Les mer om hovedstyret"}
+              <Button
+                asChild
+                className="bg-vektor-darkblue hover:bg-vektor-blue"
+              >
+                <Link to="/team/hovedstyret">
+                  Les mer om hovedstyret
+                </Link>
               </Button>
             </div>
           )}
+
         </div>
         <div className="min-w-0 divide-y divide-solid">
           {department === "Hovedstyret" && membersPending && (
@@ -193,23 +200,23 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           {contacts.map((contact) => {
             return (
               <div className="mb-3 md:mb-4" key={contact.name}>
-                <div className="mt-1 text-blue-800 dark:text-gray-200">
-                  {contact.name}
-                </div>
-                <div className="my-2 flex flex-col items-start gap-1 md:my-3 md:flex-row md:items-center">
+                <div className="mt-1">
                   {contact.title && (
-                    <span className="whitespace-nowrap">{contact.title}</span>
+                    <span className="text-blue-800 dark:text-gray-200">
+                      {contact.title}:{" "}
+                    </span>
                   )}
-                  <button
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(contact.mail);
-                    }}
-                    className="break-all text-sm hover:underline md:text-base"
-                    type="button"
+                  <span>{contact.name}</span>
+                </div>
+
+                {contact.mail && (
+                  <a
+                    href={`mailto:${contact.mail}`}
+                    className="mt-1 block w-fit break-all text-sm hover:underline md:text-base"
                   >
                     {contact.mail}
-                  </button>
-                </div>
+                  </a>
+                )}
               </div>
             );
           })}
