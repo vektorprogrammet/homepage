@@ -28,7 +28,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { studyOptions } from "~/lib/studies";
 import { cn } from "~/lib/utils";
 
-const studies = studyOptions.map((value) => ({ value, label: value }));
+const studies = Object.keys(studyOptions).map((value) => ({ value, label: value }));
 
 const cityLabels = {
   trondheim: "Trondheim",

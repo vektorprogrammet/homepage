@@ -53,7 +53,7 @@ import {
 import React from "react";
 import { studyOptions } from "~/lib/studies";
 
-const studies = studyOptions.map((value) => ({ value, label: value }));
+const studies = Object.entries(studyOptions).map(([label, value]) => ({ value, label }));
 
 /* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
 const cityApplicationOpen: Record<City, boolean> = {
