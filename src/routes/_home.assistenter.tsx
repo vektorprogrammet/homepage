@@ -296,7 +296,20 @@ function CityTabs({ city }: { city: CityPretty }) {
 
 function CityApplyCard({ city }: { city: CityPretty }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [formData, setFormData] = React.useState<Partial<Application>>({
+    semester: 1, // TODO: find out how to set current semester here
+  });
+  function handleInputChange<T extends keyof Application>(
+    name: T,
+    value: Application[T],
+  ) {
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  }
 
   const openNow = isApplicationOpen(city);
 
@@ -330,6 +343,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("firstName", e.target.value);
                       }}
                     />
                   </div>
@@ -346,6 +360,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("lastName", e.target.value);
                       }}
                     />
                   </div>
@@ -364,6 +379,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("email", e.target.value);
                       }}
                     />
                   </div>
@@ -380,6 +396,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("phonenumber", e.target.value);
                       }}
                     />
                   </div>
@@ -394,8 +411,8 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           aria-expanded={open}
                           className="w-full rounded-md border border-gray-300 text-left text-black shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          {value
-                            ? studies.find((studies) => studies.value === value)
+                          {formData.fieldOfStudyId
+                            ? studies.find((studies) => studies.value === formData.fieldOfStudyId)
                                 ?.label
                             : "Velg studieretning"}
                           <ChevronsUpDown className="opacity-50" />
@@ -413,20 +430,16 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                               {studies.map((studies) => (
                                 <CommandItem
                                   key={studies.value}
-                                  value={studies.value}
-                                  onSelect={(currentValue) => {
-                                    setValue(
-                                      currentValue === value
-                                        ? ""
-                                        : currentValue,
-                                    );
+                                  value={String(studies.value)}
+                                  onSelect={(newValue) => {
+                                    handleInputChange("fieldOfStudyId", Number(newValue));
                                     setOpen(false);
                                   }}
                                 >
                                   {studies.label}
                                   <Check
                                     className={cn(
-                                      value === studies.value
+                                      formData.fieldOfStudyId === studies.value
                                         ? "opacity-100"
                                         : "opacity-0",
                                     )}
@@ -443,7 +456,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <div className="flex w-full flex-col md:flex-row md:space-x-4">
                       <div className="w-full space-y-1 md:w-1/2">
                         <Label htmlFor="gender">Kjønn</Label>
-                        <Select>
+                        <Select
+                          onValueChange={(newValue) =>
+                            handleInputChange("gender", newValue)
+                          }
+                        >
                           <SelectTrigger className="w-full text-black">
                             <SelectValue
                               className="w-full"
@@ -459,7 +476,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                       </div>
                       <div className="w-full space-y-1 md:w-1/2">
                         <Label htmlFor="grade">Årstrinn</Label>
-                        <Select>
+                        <Select
+                          onValueChange={(newValue) =>
+                            handleInputChange("yearOfStudy", Number(newValue))
+                          }
+                        >
                           <SelectTrigger className="w-full text-black">
                             <SelectValue
                               className="w-full text-black"
@@ -467,21 +488,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                             />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="firstGrade">
-                              1. klasse
-                            </SelectItem>
-                            <SelectItem value="secondGrade">
-                              2. klasse
-                            </SelectItem>
-                            <SelectItem value="thirdGrade">
-                              3. klasse
-                            </SelectItem>
-                            <SelectItem value="fourthGrade">
-                              4. klasse
-                            </SelectItem>
-                            <SelectItem value="fifthGrade">
-                              5. klasse
-                            </SelectItem>
+                            <SelectItem value="1">1. klasse</SelectItem>
+                            <SelectItem value="2">2. klasse</SelectItem>
+                            <SelectItem value="3">3. klasse</SelectItem>
+                            <SelectItem value="4">4. klasse</SelectItem>
+                            <SelectItem value="5">5. klasse</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -493,6 +504,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                 <Button
                   variant="green"
                   className="w-[100%] md:w-[48%] lg:w-[22.5%]"
+                  onClick={() => {
+                    if (isValidApplication(formData)) {
+                      sendAssistantApplication(formData);
+                    }
+                  }}
                 >
                   Søk nå!
                 </Button>
