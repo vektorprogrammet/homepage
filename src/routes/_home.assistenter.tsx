@@ -51,6 +51,11 @@ import {
 } from "@/components/ui/popover";
 
 import React from "react";
+import {
+  type Application,
+  sendAssistantApplication,
+  isValidApplication,
+} from "~/api/send-application";
 import { studyOptions } from "~/lib/studies";
 
 const studies = Object.entries(studyOptions).map(([label, value]) => ({ value, label }));
