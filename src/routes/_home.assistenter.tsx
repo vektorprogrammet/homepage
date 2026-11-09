@@ -297,7 +297,7 @@ function CityTabs({ city }: { city: CityPretty }) {
 function CityApplyCard({ city }: { city: CityPretty }) {
   const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState<Partial<Application>>({
-    semester: 1, // TODO: find out how to set current semester here
+    semester: 1,
   });
   function handleInputChange<T extends keyof Application>(
     name: T,
@@ -336,10 +336,10 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                 <form
                   id="assistant-application-form"
                   className="grid gap-5 sm:grid-cols-2"
-                  onSubmit={(event) => {
+                  onSubmit={async (event) => {
                     event.preventDefault();
                     if (isValidApplication(formData)) {
-                      sendAssistantApplication(formData);
+                      await sendAssistantApplication(formData);
                     }
                   }}
                 >
