@@ -1,56 +1,72 @@
-interface Member {
-  name: string;
-  image: string;
-  role: string;
-}
+import { useQuery } from "@tanstack/react-query";
+import { getFullTeamOptions } from "~/api/queries/team-queries";
+import { TeamTemplateDescription } from "./team-template-description";
 
 export function TeamTemplate({
-  name,
-  mail,
-  text,
-  members,
+  department,
+  team,
 }: {
-  name: string;
-  mail: string;
-  text: string;
-  members: Array<Member>;
+  department: string;
+  team: string;
 }) {
+  const {
+    data: fullTeam,
+    isPending,
+    isError,
+  } = useQuery(getFullTeamOptions(department, team));
+
+  if (isPending) {
+    return <p>Laster teammedlemmer...</p>;
+  }
+
+  if (isError) {
+    return <p>Kunne ikke hente teammedlemmer.</p>;
+  }
+
   return (
     <div>
-      <h1 className="mt-10 text-center font-bold text-4xl text-vektor-darblue">
-        {name}
+      <h1 className="text-center font-bold text-4xl text-vektor-darblue">
+        {fullTeam.team.name}
       </h1>
       <div className="mt-5 text-center font-bold text-base text-vektor-darblue">
         {"Epost: "}
         <a
           className="overflow-hidden break-all font-normal text-base hover:underline"
-          href={`mailto:${mail}`}
+          href={`mailto:${fullTeam.team.email}`}
         >
-          {mail}
+          {fullTeam.team.email}
         </a>
       </div>
       <div className="m-3 my-5 text-center font-sans text-vektor-darblue text-xl">
-        {text}
+        {fullTeam.team.shortDescription}
       </div>
-      <div className="mt-10 flex flex-wrap justify-center">
-        {members.map((data) => {
+      <div className="mt-10 mb-10 flex flex-wrap justify-center gap-x-6 gap-y-8">
+        {fullTeam.members.map((member) => {
+          const name = `${member.firstName} ${member.lastName}`.trim();
+
           return (
-            <div key={data.image} className="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5">
+            <div key={member.id} className="w-40">
               <div className="max-w-6xl content-center justify-between">
                 <img
-                  alt={`Bilde av ${data.name}`}
-                  src={data.image}
+                  alt={`Bilde av ${name}`}
+                  src={
+                    member.profilePictureUrl ??
+                    "https://vektorprogrammet.no/media/cache/profile_img_small/images/defaultProfile.png"
+                  }
                   className="mx-auto mt-6 mb-2 h-32 rounded-full grayscale"
                 />
                 <div className="mt-3 text-center font-bold font-sans text-vektor-darblue">
-                  {data.name}
+                  {name}
                 </div>
-                <div className="text-center font-sans">{data.role}</div>
+                <div className="text-center font-sans">
+                  {member.teamUserRoleName}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
+      <TeamTemplateDescription descriptionBlocks={fullTeam.team.description} />
     </div>
   );
 }

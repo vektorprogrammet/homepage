@@ -182,6 +182,6 @@ function infoHovedstyret(): TeamInfo {
         mail: "odin@vektorprogrammet.no",
       },
     ],
-    openForContact: false,
+    openForContact: true,
   };
 }

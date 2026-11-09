@@ -1,6 +1,6 @@
 export const cities = {
-  trondheim: "Trondheim",
   bergen: "Bergen",
+  trondheim: "Trondheim",
   aas: "Ås",
 } as const;
 export type City = keyof typeof cities;
