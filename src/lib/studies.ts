@@ -1,3 +1,3 @@
 export const studyOptions = {
-  Annet: 1,
+  annet: 1,
 };

@@ -9,14 +9,14 @@ export type Application = {
   semester: number;
 };
 const ApplicationFields = [
-    "yearOfStudy",
-    "phonenumber",
-    "fieldOfStudyId",
-    "email",
-    "gender",
-    "firstName",
-    "lastName",
-    "semester",
+  "yearOfStudy",
+  "phonenumber",
+  "fieldOfStudyId",
+  "email",
+  "gender",
+  "firstName",
+  "lastName",
+  "semester",
 ] as const satisfies ReadonlyArray<keyof Application>;
 
 export function isValidApplication(

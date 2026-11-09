@@ -54,12 +54,15 @@ import {
 import React from "react";
 import {
   type Application,
-  sendAssistantApplication,
   isValidApplication,
+  sendAssistantApplication,
 } from "~/api/send-application";
 import { studyOptions } from "~/lib/studies";
 
-const studies = Object.entries(studyOptions).map(([label, value]) => ({ value, label }));
+const studies = Object.entries(studyOptions).map(([label, value]) => ({
+  value,
+  label,
+}));
 
 /* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
 const cityApplicationOpen: Record<City, boolean> = {
@@ -334,12 +337,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                   id="assistant-application-form"
                   className="grid gap-5 sm:grid-cols-2"
                   onSubmit={(event) => {
-                      event.preventDefault();
-                      if (isValidApplication(formData)) {
-                        sendAssistantApplication(formData);
-                      }
+                    event.preventDefault();
+                    if (isValidApplication(formData)) {
+                      sendAssistantApplication(formData);
                     }
-                  }
+                  }}
                 >
                   <div className="space-y-2">
                     <Label htmlFor="fornavn" className="text-base text-white">
@@ -446,8 +448,10 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           className="h-12 w-full justify-between rounded-lg border-white/15 bg-white px-3 font-normal text-gray-950 text-sm hover:bg-gray-50 hover:text-gray-950 focus-visible:ring-vektor-blue"
                         >
                           {formData.fieldOfStudyId
-                            ? studies.find((studies) => studies.value === formData.fieldOfStudyId)
-                                ?.label
+                            ? studies.find(
+                                (studies) =>
+                                  studies.value === formData.fieldOfStudyId,
+                              )?.label
                             : "Velg studieretning"}
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
@@ -465,7 +469,10 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                                   key={studies.value}
                                   value={String(studies.value)}
                                   onSelect={(newValue) => {
-                                    handleInputChange("fieldOfStudyId", Number(newValue));
+                                    handleInputChange(
+                                      "fieldOfStudyId",
+                                      Number(newValue),
+                                    );
                                     setOpen(false);
                                   }}
                                 >
@@ -489,7 +496,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Label htmlFor="gender" className="text-base text-white">
                       Kjønn
                     </Label>
-                    <Select name="gender" onValueChange={(newValue) => handleInputChange("gender", newValue)}>
+                    <Select
+                      name="gender"
+                      onValueChange={(newValue) =>
+                        handleInputChange("gender", newValue)
+                      }
+                    >
                       <SelectTrigger
                         id="gender"
                         className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
@@ -507,7 +519,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Label htmlFor="grade" className="text-base text-white">
                       Årstrinn
                     </Label>
-                    <Select name="grade" onValueChange={(newValue) => handleInputChange("yearOfStudy", Number(newValue))}>
+                    <Select
+                      name="grade"
+                      onValueChange={(newValue) =>
+                        handleInputChange("yearOfStudy", Number(newValue))
+                      }
+                    >
                       <SelectTrigger
                         id="grade"
                         className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
