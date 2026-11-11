@@ -56,6 +56,9 @@ import {
   type Application,
   isValidApplication,
   sendAssistantApplication,
+  genders,
+  yearsOfStudy,
+  isValidLiteral,
 } from "~/api/send-application";
 import { studyOptions } from "~/lib/studies";
 
@@ -498,8 +501,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     </Label>
                     <Select
                       name="gender"
-                      onValueChange={(newValue) =>
-                        handleInputChange("gender", newValue)
+                      onValueChange={(newValue) => {
+                        if(isValidLiteral(genders, newValue)) {
+                          handleInputChange("gender", newValue)
+                        }
+                      }
                       }
                     >
                       <SelectTrigger
@@ -512,6 +518,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                         <SelectItem value="male">Mann</SelectItem>
                         <SelectItem value="female">Kvinne</SelectItem>
                         <SelectItem value="other">Annet</SelectItem>
+                        <SelectItem value="withheld">Vil ikke oppgi</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -521,9 +528,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     </Label>
                     <Select
                       name="grade"
-                      onValueChange={(newValue) =>
-                        handleInputChange("yearOfStudy", Number(newValue))
-                      }
+                      onValueChange={(newValue) => {
+                        if(isValidLiteral(yearsOfStudy, newValue)) {
+                          handleInputChange("yearOfStudy", newValue)
+                        }
+                      }}
                     >
                       <SelectTrigger
                         id="grade"
@@ -532,11 +541,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                         <SelectValue placeholder="Velg årstrinn" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1. klasse</SelectItem>
-                        <SelectItem value="2">2. klasse</SelectItem>
-                        <SelectItem value="3">3. klasse</SelectItem>
-                        <SelectItem value="4">4. klasse</SelectItem>
-                        <SelectItem value="5">5. klasse</SelectItem>
+                        <SelectItem value="1">1. år</SelectItem>
+                        <SelectItem value="2">2. år</SelectItem>
+                        <SelectItem value="3">3. år</SelectItem>
+                        <SelectItem value="4">4. år</SelectItem>
+                        <SelectItem value="5">5. år</SelectItem>
+                        <SelectItem value="6<=">Over 5 år</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
