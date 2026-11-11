@@ -26,7 +26,10 @@ export function isValidApplication(
 ): data is Application {
   return isValid(data, ApplicationFields);
 }
-export function isValidLiteral<T extends D, D>(array: ReadonlyArray<T>, data: D): data is T {
+export function isValidLiteral<T extends D, D>(
+  array: ReadonlyArray<T>,
+  data: D,
+): data is T {
   return (array as ReadonlyArray<D>).includes(data);
 }
 function isValid<T extends object>(

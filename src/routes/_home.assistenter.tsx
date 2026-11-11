@@ -54,11 +54,11 @@ import {
 import React from "react";
 import {
   type Application,
-  isValidApplication,
-  sendAssistantApplication,
   genders,
-  yearsOfStudy,
+  isValidApplication,
   isValidLiteral,
+  sendAssistantApplication,
+  yearsOfStudy,
 } from "~/api/send-application";
 import { studyOptions } from "~/lib/studies";
 
@@ -502,11 +502,10 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Select
                       name="gender"
                       onValueChange={(newValue) => {
-                        if(isValidLiteral(genders, newValue)) {
-                          handleInputChange("gender", newValue)
+                        if (isValidLiteral(genders, newValue)) {
+                          handleInputChange("gender", newValue);
                         }
-                      }
-                      }
+                      }}
                     >
                       <SelectTrigger
                         id="gender"
@@ -529,8 +528,8 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Select
                       name="grade"
                       onValueChange={(newValue) => {
-                        if(isValidLiteral(yearsOfStudy, newValue)) {
-                          handleInputChange("yearOfStudy", newValue)
+                        if (isValidLiteral(yearsOfStudy, newValue)) {
+                          handleInputChange("yearOfStudy", newValue);
                         }
                       }}
                     >
