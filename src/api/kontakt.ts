@@ -1,4 +1,7 @@
 import type { DepartmentPretty } from "~/lib/types";
+import { trimTrailingSlashes } from "~/lib/url";
+import type { Department } from "./departments";
+import type { TeamOverview } from "./team";
 
 interface KontaktCard {
   title: string;
@@ -142,7 +145,7 @@ export async function fetchHovedstyreMemberDetails(): Promise<
   Array<HovedstyreMemberOverview>
 > {
   const response = await fetch(
-    "http://localhost:8080/teams/hovedstyret/contacts",
+    `${trimTrailingSlashes(import.meta.env.VITE_API_URL)}/teams/hovedstyret/contacts`,
   );
 
   if (!response.ok) {
@@ -172,5 +175,35 @@ function infoHovedstyret(): TeamInfo {
     button: true,
     contacts: [],
     openForContact: true,
+  };
+}
+
+export async function fetchContactTeams(): Promise<Array<TeamOverview>> {
+  const baseUrl = import.meta.env.VITE_API_URL;
+  if (!baseUrl) throw new Error("VITE_API_URL is not configured");
+  const response = await fetch(
+    `${trimTrailingSlashes(baseUrl)}/teams/active/overview`,
+  );
+  if (!response.ok)
+    throw new Error(`Failed to fetch contact teams: ${response.status}`);
+  return await response.json();
+}
+
+export function getDepartmentContactInfo(
+  department: Department,
+  teamOverviews: Array<TeamOverview>,
+): TeamInfo {
+  const teams = teamOverviews.filter(
+    ({ team }) =>
+      team.departmentId === department.id && team.name !== "Hovedstyret",
+  );
+  const board = teams.find(({ team }) => team.name === "Styret");
+  return {
+    name: department.city,
+    description: board?.team.shortDescription ?? "",
+    email: board?.team.email ?? "",
+    contacts: teams.map(({ team }) => ({ name: team.name, mail: team.email })),
+    members: board?.memberCount,
+    openForContact: Boolean(board?.team.email),
   };
 }

@@ -9,10 +9,6 @@ export default {
       "/team/trondheim",
       "/team/aas",
       "/team/hovedstyret",
-      "/kontakt/bergen",
-      "/kontakt/trondheim",
-      "/kontakt/aas",
-      "/kontakt/hovedstyret",
       ...getStaticPaths(),
     ];
   },
