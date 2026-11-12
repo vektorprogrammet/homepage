@@ -209,11 +209,7 @@ function DepartmentCard({ department }: { readonly department?: Department }) {
             return (
               <div className="mb-3 md:mb-4" key={contact.name}>
                 <div className="mt-1">
-                  {contact.title && (
-                    <span className="text-blue-800 dark:text-gray-200">
-                      {contact.title}:{" "}
-                    </span>
-                  )}
+                  {contact.title && <span>{contact.title}: </span>}
                   <span>{contact.name}</span>
                 </div>
 
