@@ -1,71 +1,78 @@
 import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, Users } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { Link } from "react-router";
-import { info } from "~/api/kontakt";
-import { getHovedstyreMemberOptions } from "~/api/queries/kontakt-queries";
-import { getTeamOptions } from "~/api/queries/team-queries";
+import { Link, href, useNavigate } from "react-router";
+import type { Department } from "~/api/departments";
+import { getDepartmentContactInfo, info } from "~/api/kontakt";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
+import {
+  getContactTeamOptions,
+  getHovedstyreMemberOptions,
+} from "~/api/queries/kontakt-queries";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { type DepartmentPretty, departments } from "~/lib/types";
 
-export function ContactTabs({ department }: { department: DepartmentPretty }) {
-  const [active, setActive] = useState<DepartmentPretty>(
-    department,
-    // ! ugly ass solution
-    /*     department === "hovedstyret"
-      ? departments.hovedstyret
-      : department === "aas"
-        ? departments.aas
-        : department === "bergen"
-          ? departments.bergen
-          : "Trondheim", */
-    // ! for some reason this doesn't work
-    /* department === undefined
-      ? "Trondheim"
-      : department in Object.keys(departments)
-        ? departments[department as keyof typeof departments]
-        : "Trondheim", */
-  );
+export function ContactTabs({ departmentSlug }: { departmentSlug?: string }) {
+  const navigate = useNavigate();
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
+  const isHovedstyret = departmentSlug === "hovedstyret";
+  const department = departmentSlug
+    ? departments.find((item) => item.slug === departmentSlug)
+    : departments[0];
+  if (isPending) return <output>Henter avdelinger …</output>;
+  if (isError)
+    return <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>;
+  if (!(isHovedstyret || department)) return <p>Fant ikke avdelingen.</p>;
+  const active = isHovedstyret ? "Hovedstyret" : (department?.city ?? "");
+  const tabs = [...departments.map((item) => item.city), "Hovedstyret"];
 
   return (
     <div className="mb-6 flex w-full flex-col items-start md:mb-auto md:max-w-6xl lg:flex-row">
       <div className="mx-auto w-full px-5 sm:w-[440px] md:w-[400px] lg:absolute lg:left-10 lg:w-auto lg:px-0">
         <TabMenu
           className="w-full lg:w-auto"
-          tabs={Object.values(departments)}
+          tabs={tabs}
           activeTab={active}
-          setActiveTab={setActive}
+          setActiveTab={(city) => {
+            const slug =
+              city === "Hovedstyret"
+                ? "hovedstyret"
+                : departments.find((item) => item.city === city)?.slug;
+            if (slug)
+              navigate(href("/kontakt/:department", { department: slug }));
+          }}
         />
       </div>
       <main className="mx-auto mb-6 flex min-h-[500px] w-[calc(100%-1rem)] flex-col items-start overflow-visible break-words rounded-md px-5 pt-0 pb-5 sm:w-[440px] md:w-[400px] lg:w-[480px] xl:w-[920px]">
         <div className="w-full flex-grow">
-          {<DepartmentCard department={active} />}
+          <DepartmentCard
+            key={isHovedstyret ? "hovedstyret" : department?.id}
+            department={isHovedstyret ? undefined : department}
+          />
         </div>
       </main>
     </div>
   );
 }
 
-function DepartmentCard({ department }: { department: DepartmentPretty }) {
+function DepartmentCard({ department }: { department?: Department }) {
+  const isHovedstyret = department === undefined;
   const [sendStatus, setSendStatus] = useState<
     "idle" | "sending" | "success" | "error"
   >("idle");
 
-  const { data: teamOverviews } = useQuery({
-    ...getTeamOptions(),
-    enabled: department === "Hovedstyret",
-  });
-
-  const hovedstyre = teamOverviews.find(
-    (overview) => overview.team.name === "Hovedstyret",
-  );
-
-  const teamId =
-    hovedstyre === undefined ? undefined : Number(hovedstyre.team.id);
+  const {
+    data: teamOverviews = [],
+    isPending: teamsPending,
+    isError: teamsError,
+  } = useQuery(getContactTeamOptions());
 
   const {
     data: hovedstyreMembers,
@@ -73,10 +80,16 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     isError: membersError,
   } = useQuery({
     ...getHovedstyreMemberOptions(),
-    enabled: department === "Hovedstyret" && teamId !== undefined,
+    enabled: isHovedstyret,
   });
 
-  const result = info(department);
+  const result = department
+    ? getDepartmentContactInfo(department, teamOverviews)
+    : info("Hovedstyret");
+  if (!isHovedstyret && teamsPending)
+    return <output>Henter kontaktopplysninger …</output>;
+  if (!isHovedstyret && teamsError)
+    return <p role="alert">Kunne ikke hente kontaktopplysninger.</p>;
 
   if (result instanceof Error) return <span>{result.message}</span>;
 
@@ -92,18 +105,21 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
 
     try {
       setSendStatus("sending");
-      const response = await fetch("http://localhost:8080/contact/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL.replace(/\/+$/, "")}/contact/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            replyTo: replyTo,
+            receivingEmail: email,
+            about: about,
+            text: `Fra: ${name}\n\n${message}`,
+          }),
         },
-        body: JSON.stringify({
-          replyTo: replyTo,
-          receivingEmail: email,
-          about: about,
-          text: `Fra: ${name}\n\n${message}`,
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Could not send message");
@@ -117,11 +133,9 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
 
   const { name, description, email, address, button, openForContact } = result;
 
-  const contacts =
-    department === "Hovedstyret" ? hovedstyreMembers : result.contacts;
+  const contacts = isHovedstyret ? hovedstyreMembers : result.contacts;
 
-  const members =
-    department === "Hovedstyret" ? hovedstyreMembers.length : result.members;
+  const members = isHovedstyret ? hovedstyreMembers.length : result.members;
 
   return (
     <>
@@ -131,18 +145,20 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
             {name}
           </h3>
           <div className="text-base">{description}</div>
-          <div className="mt-3 flex items-center gap-1 md:mt-5">
-            <Mail className="h-5 w-5 text-black" />
-            <Button
-              onClick={async () => {
-                await navigator.clipboard.writeText(email);
-              }}
-              variant="link"
-              className="h-auto justify-start p-0"
-            >
-              {email}
-            </Button>
-          </div>
+          {email && (
+            <div className="mt-3 flex items-center gap-1 md:mt-5">
+              <Mail className="h-5 w-5 text-black" />
+              <Button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(email);
+                }}
+                variant="link"
+                className="h-auto justify-start p-0"
+              >
+                {email}
+              </Button>
+            </div>
+          )}
           {address && (
             <div className="mt-2 flex gap-1 text-sm">
               <MapPin className="h-5 w-5 text-black" />
@@ -176,12 +192,13 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
           )}
         </div>
         <div className="min-w-0 divide-y divide-solid">
-          {department === "Hovedstyret" && membersPending && (
-            <p>Laster medlemmer...</p>
-          )}
+          {isHovedstyret && membersPending && <p>Laster medlemmer...</p>}
 
-          {department === "Hovedstyret" && membersError && (
-            <p>Kunne ikke hente medlemmene.</p>
+          {isHovedstyret && membersError && <p>Kunne ikke hente medlemmene.</p>}
+          {!isHovedstyret && contacts.length === 0 && (
+            <p>
+              Kontaktopplysninger er ikke lagt inn for denne avdelingen ennå.
+            </p>
           )}
           {contacts.map((contact) => {
             return (

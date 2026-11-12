@@ -1,10 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, href } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { Divider } from "~/components/divider";
 import { Button } from "~/components/ui/button";
-import { cities } from "~/lib/types";
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function ForSkoler() {
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
   return (
     <main>
       <div className="mx-5 mt-20 flex flex-col items-center justify-center gap-3 font-sans leading-relaxed md:gap-5 dark:text-text-dark">
@@ -96,27 +102,22 @@ export default function ForSkoler() {
           </p>
         </div>
         <nav className="flex flex-col md:flex-row">
-          {Object.entries(cities)
-            .map((city) => {
-              const key = city[0];
-              const value = city[1];
-              return {
-                city: value,
-                url: href("/kontakt/:department", { department: key }),
-              };
-            })
-            .map(({ city, url }) => {
-              return (
-                <Button
-                  variant="green"
-                  className="my-2 min-w-48 px-4 py-2 md:mx-6"
-                  key={city}
-                  asChild
-                >
-                  <Link to={url}>{city}</Link>
-                </Button>
-              );
-            })}
+          {isPending && <output>Henter avdelinger …</output>}
+          {isError && (
+            <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>
+          )}
+          {departments.map(({ id, city, slug }) => (
+            <Button
+              variant="green"
+              className="my-2 min-w-48 px-4 py-2 md:mx-6"
+              key={id}
+              asChild
+            >
+              <Link to={href("/kontakt/:department", { department: slug })}>
+                {city}
+              </Link>
+            </Button>
+          ))}
         </nav>
         <div>
           <h3 className="max-w-3xl text-center font-bold text-vektor-DARKblue text-xl md:text-2xl dark:text-text-dark">
@@ -124,13 +125,15 @@ export default function ForSkoler() {
           </h3>
           <p className="my-4 max-w-3xl text-md md:text-center md:text-lg">
             {"Ta kontakt med "}
-            <Link to={href("/kontakt/:department", { department: "hovedstyret" })}>
+            <Link
+              to={href("/kontakt/:department", { department: "hovedstyret" })}
+            >
               <span className="hover:underline">{"hovedstyret"}</span>
             </Link>
             {" for å melde din interesse!"}
           </p>
         </div>
       </section>
-    </main >
+    </main>
   );
 }
