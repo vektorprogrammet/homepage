@@ -16,6 +16,9 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { trimTrailingSlashes } from "~/lib/url";
 
+const emailLinkClassName =
+  "rounded-sm text-blue-800 underline underline-offset-4 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-800 focus-visible:ring-offset-2 dark:text-gray-200 dark:hover:text-white dark:focus-visible:ring-gray-200";
+
 export function ContactTabs({
   departmentSlug,
 }: { readonly departmentSlug?: string }) {
@@ -149,17 +152,14 @@ function DepartmentCard({ department }: { readonly department?: Department }) {
           </h3>
           <div className="text-base">{description}</div>
           {email && (
-            <div className="mt-3 flex items-center gap-1 md:mt-5">
-              <Mail className="h-5 w-5 text-black" />
-              <Button
-                onClick={async () => {
-                  await navigator.clipboard.writeText(email);
-                }}
-                variant="link"
-                className="h-auto justify-start p-0"
+            <div className="mt-3 flex items-start gap-2 md:mt-5">
+              <Mail className="mt-0.5 h-5 w-5 shrink-0 text-black" />
+              <a
+                href={`mailto:${email}`}
+                className={`${emailLinkClassName} min-w-0 break-words text-left text-sm md:text-base`}
               >
                 {email}
-              </Button>
+              </a>
             </div>
           )}
           {address && (
@@ -218,7 +218,7 @@ function DepartmentCard({ department }: { readonly department?: Department }) {
                 {contact.mail && (
                   <a
                     href={`mailto:${contact.mail}`}
-                    className="mt-1 block w-fit break-all text-sm hover:underline md:text-base"
+                    className={`${emailLinkClassName} mt-1 block w-fit break-all text-sm md:text-base`}
                   >
                     {contact.mail}
                   </a>
@@ -231,10 +231,7 @@ function DepartmentCard({ department }: { readonly department?: Department }) {
       {openForContact && (
         <div className="mx-auto max-w-[600px] dark:bg-neutral-800">
           <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
-            {isHovedstyret
-              ? "Kontakt Hovedstyret"
-              : `Kontakt styret i ${name}`
-            }
+            {isHovedstyret ? "Kontakt Hovedstyret" : `Kontakt styret i ${name}`}
           </div>
           <form onSubmit={sendContactForm}>
             <div className="mt-7 mb-5 grid xl:grid-cols-2 xl:gap-6">
