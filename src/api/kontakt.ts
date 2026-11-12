@@ -1,4 +1,5 @@
 import type { DepartmentPretty } from "~/lib/types";
+import { trimTrailingSlashes } from "~/lib/url";
 import type { Department } from "./departments";
 import type { TeamOverview } from "./team";
 
@@ -144,7 +145,7 @@ export async function fetchHovedstyreMemberDetails(): Promise<
   Array<HovedstyreMemberOverview>
 > {
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL.replace(/\/+$/, "")}/teams/hovedstyret/contacts`,
+    `${trimTrailingSlashes(import.meta.env.VITE_API_URL)}/teams/hovedstyret/contacts`,
   );
 
   if (!response.ok) {
@@ -181,7 +182,7 @@ export async function fetchContactTeams(): Promise<Array<TeamOverview>> {
   const baseUrl = import.meta.env.VITE_API_URL;
   if (!baseUrl) throw new Error("VITE_API_URL is not configured");
   const response = await fetch(
-    `${baseUrl.replace(/\/+$/, "")}/teams/active/overview`,
+    `${trimTrailingSlashes(baseUrl)}/teams/active/overview`,
   );
   if (!response.ok)
     throw new Error(`Failed to fetch contact teams: ${response.status}`);

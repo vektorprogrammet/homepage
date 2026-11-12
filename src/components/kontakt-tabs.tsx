@@ -14,8 +14,11 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { trimTrailingSlashes } from "~/lib/url";
 
-export function ContactTabs({ departmentSlug }: { departmentSlug?: string }) {
+export function ContactTabs({
+  departmentSlug,
+}: { readonly departmentSlug?: string }) {
   const navigate = useNavigate();
   const {
     data: departments = [],
@@ -62,7 +65,7 @@ export function ContactTabs({ departmentSlug }: { departmentSlug?: string }) {
   );
 }
 
-function DepartmentCard({ department }: { department?: Department }) {
+function DepartmentCard({ department }: { readonly department?: Department }) {
   const isHovedstyret = department === undefined;
   const [sendStatus, setSendStatus] = useState<
     "idle" | "sending" | "success" | "error"
@@ -106,7 +109,7 @@ function DepartmentCard({ department }: { department?: Department }) {
     try {
       setSendStatus("sending");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL.replace(/\/+$/, "")}/contact/`,
+        `${trimTrailingSlashes(import.meta.env.VITE_API_URL)}/contact/`,
         {
           method: "POST",
           headers: {

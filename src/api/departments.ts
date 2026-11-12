@@ -1,3 +1,4 @@
+import { trimTrailingSlashes } from "~/lib/url";
 export type Department = {
   id: number;
   city: string;
@@ -11,7 +12,7 @@ export async function fetchDepartments(): Promise<Array<Department>> {
     throw new Error("VITE_API_URL is not configured");
   }
 
-  const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/departments/`);
+  const response = await fetch(`${trimTrailingSlashes(baseUrl)}/departments/`);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch departments: ${response.status}`);
