@@ -1,10 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, href } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { Divider } from "~/components/divider";
 import { Button } from "~/components/ui/button";
-import { cities } from "~/lib/types";
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function ForSkoler() {
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
   return (
     <main>
       <div className="mx-5 mt-20 flex flex-col items-center justify-center gap-3 font-sans leading-relaxed md:gap-5 dark:text-text-dark">
@@ -21,19 +27,12 @@ export default function ForSkoler() {
               dine timer.`}
             </p>
             <Divider />
-            <br />
             <p>
               {`Vektorprogrammet er Norges største organisasjon som arbeider for å
               øke interessen for matematikk og realfag blant elever i
               grunnskolen. Vi er en studentorganisasjon som sender ut dyktige og
               motiverte studenter til ungdomsskoler i Norge.`}
             </p>
-            <br />
-            <img
-              src="/images/teacher2.png"
-              alt="Teacher"
-              className="mx-auto w-1/2 flex-wrap items-center justify-center gap-5 md:flex-nowrap md:justify-between md:gap-14"
-            />
             <br />
             <p>
               {`Studentene fungerer som lærerens assistenter og kan dermed bidra
@@ -43,6 +42,12 @@ export default function ForSkoler() {
               elevene som står fast. Derfor er vi overbevist om at to
               assistenter kan forhindre mye hodebry for både lærere og elever.`}
             </p>
+            <br />
+            <img
+              src="/images/teacher2.png"
+              alt="Teacher"
+              className="mx-auto w-1/2 flex-wrap items-center justify-center gap-5 md:flex-nowrap md:justify-between md:gap-14"
+            />
             <br />
             <p>
               {`Hvert år gjennomfører vi evalueringsundersøkelser, og i
@@ -85,7 +90,7 @@ export default function ForSkoler() {
           </ul>
         </div>
       </div>
-      <section className="mx-auto mt-40 mb-20 flex max-w-80 flex-col items-center gap-10 p-5 md:max-w-none md:gap-10 dark:text-text-dark">
+      <section className="mx-auto mt-10 mb-20 flex max-w-80 flex-col items-center gap-10 p-5 md:max-w-none md:gap-10 dark:text-text-dark">
         <div className="flex flex-col gap-3 md:gap-5">
           <h2 className="max-w-3xl text-center font-bold text-2xl text-vektor-DARKblue md:text-4xl dark:text-text-dark">
             {"Søk om å få assistenter til din skole"}
@@ -97,27 +102,22 @@ export default function ForSkoler() {
           </p>
         </div>
         <nav className="flex flex-col md:flex-row">
-          {Object.entries(cities)
-            .map((city) => {
-              const key = city[0];
-              const value = city[1];
-              return {
-                city: value,
-                url: href("/kontakt/:department", { department: key }),
-              };
-            })
-            .map(({ city, url }) => {
-              return (
-                <Button
-                  variant="green"
-                  className="my-2 min-w-48 px-4 py-2 md:mx-6"
-                  key={city}
-                  asChild
-                >
-                  <Link to={url}>{city}</Link>
-                </Button>
-              );
-            })}
+          {isPending && <output>Henter avdelinger …</output>}
+          {isError && (
+            <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>
+          )}
+          {departments.map(({ id, city, slug }) => (
+            <Button
+              variant="green"
+              className="my-2 min-w-48 px-4 py-2 md:mx-6"
+              key={id}
+              asChild
+            >
+              <Link to={href("/kontakt/:department", { department: slug })}>
+                {city}
+              </Link>
+            </Button>
+          ))}
         </nav>
         <div>
           <h3 className="max-w-3xl text-center font-bold text-vektor-DARKblue text-xl md:text-2xl dark:text-text-dark">
@@ -125,7 +125,9 @@ export default function ForSkoler() {
           </h3>
           <p className="my-4 max-w-3xl text-md md:text-center md:text-lg">
             {"Ta kontakt med "}
-            <Link to={href("/team/hovedstyret")}>
+            <Link
+              to={href("/kontakt/:department", { department: "hovedstyret" })}
+            >
               <span className="hover:underline">{"hovedstyret"}</span>
             </Link>
             {" for å melde din interesse!"}
