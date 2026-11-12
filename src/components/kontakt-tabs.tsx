@@ -52,7 +52,9 @@ export function ContactTabs({
                 ? "hovedstyret"
                 : departments.find((item) => item.city === city)?.slug;
             if (slug)
-              navigate(href("/kontakt/:department", { department: slug }), { preventScrollReset: true });
+              navigate(href("/kontakt/:department", { department: slug }), {
+                preventScrollReset: true,
+              });
           }}
         />
       </div>
