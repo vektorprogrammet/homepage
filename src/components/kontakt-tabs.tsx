@@ -233,7 +233,7 @@ function DepartmentCard({ department }: { readonly department?: Department }) {
           <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
             {isHovedstyret
               ? "Kontakt Hovedstyret"
-              : ´Kontakt styret i ${name}´
+              : `Kontakt styret i ${name}`
             }
           </div>
           <form onSubmit={sendContactForm}>
