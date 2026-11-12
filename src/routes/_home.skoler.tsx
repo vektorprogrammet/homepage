@@ -21,19 +21,12 @@ export default function ForSkoler() {
               dine timer.`}
             </p>
             <Divider />
-            <br />
             <p>
               {`Vektorprogrammet er Norges største organisasjon som arbeider for å
               øke interessen for matematikk og realfag blant elever i
               grunnskolen. Vi er en studentorganisasjon som sender ut dyktige og
               motiverte studenter til ungdomsskoler i Norge.`}
             </p>
-            <br />
-            <img
-              src="/images/teacher2.png"
-              alt="Teacher"
-              className="mx-auto w-1/2 flex-wrap items-center justify-center gap-5 md:flex-nowrap md:justify-between md:gap-14"
-            />
             <br />
             <p>
               {`Studentene fungerer som lærerens assistenter og kan dermed bidra
@@ -43,6 +36,12 @@ export default function ForSkoler() {
               elevene som står fast. Derfor er vi overbevist om at to
               assistenter kan forhindre mye hodebry for både lærere og elever.`}
             </p>
+            <br />
+            <img
+              src="/images/teacher2.png"
+              alt="Teacher"
+              className="mx-auto w-1/2 flex-wrap items-center justify-center gap-5 md:flex-nowrap md:justify-between md:gap-14"
+            />
             <br />
             <p>
               {`Hvert år gjennomfører vi evalueringsundersøkelser, og i
@@ -85,7 +84,7 @@ export default function ForSkoler() {
           </ul>
         </div>
       </div>
-      <section className="mx-auto mt-40 mb-20 flex max-w-80 flex-col items-center gap-10 p-5 md:max-w-none md:gap-10 dark:text-text-dark">
+      <section className="mx-auto mt-10 mb-20 flex max-w-80 flex-col items-center gap-10 p-5 md:max-w-none md:gap-10 dark:text-text-dark">
         <div className="flex flex-col gap-3 md:gap-5">
           <h2 className="max-w-3xl text-center font-bold text-2xl text-vektor-DARKblue md:text-4xl dark:text-text-dark">
             {"Søk om å få assistenter til din skole"}
