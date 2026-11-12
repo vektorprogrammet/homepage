@@ -124,13 +124,13 @@ export default function ForSkoler() {
           </h3>
           <p className="my-4 max-w-3xl text-md md:text-center md:text-lg">
             {"Ta kontakt med "}
-            <Link to={href("/team/hovedstyret")}>
+            <Link to={href("/kontakt/:department", { department: "hovedstyret" })}>
               <span className="hover:underline">{"hovedstyret"}</span>
             </Link>
             {" for å melde din interesse!"}
           </p>
         </div>
       </section>
-    </main>
+    </main >
   );
 }
