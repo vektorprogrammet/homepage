@@ -211,7 +211,10 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
       {openForContact && (
         <div className="mx-auto max-w-[600px] dark:bg-neutral-800">
           <div className="pt-10 text-center font-bold text-2xl text-blue-800 dark:text-gray-200">
-            {`Kontakt styret i ${name}`}
+            {isHovedstyret
+              ? "Kontakt Hovedstyret"
+              : ´Kontakt styret i ${name}´
+            }
           </div>
           <form onSubmit={sendContactForm}>
             <div className="mt-7 mb-5 grid xl:grid-cols-2 xl:gap-6">
