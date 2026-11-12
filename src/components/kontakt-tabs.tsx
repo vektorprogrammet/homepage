@@ -115,24 +115,13 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
     }
   }
 
-  const {
-    name,
-    description,
-    email,
-    address,
-    button,
-    openForContact,
-  } = result;
+  const { name, description, email, address, button, openForContact } = result;
 
   const contacts =
-    department === "Hovedstyret"
-      ? hovedstyreMembers
-      : result.contacts;
+    department === "Hovedstyret" ? hovedstyreMembers : result.contacts;
 
   const members =
-    department === "Hovedstyret"
-      ? hovedstyreMembers.length
-      : result.members;
+    department === "Hovedstyret" ? hovedstyreMembers.length : result.members;
 
   return (
     <>
@@ -181,13 +170,10 @@ function DepartmentCard({ department }: { department: DepartmentPretty }) {
                 asChild
                 className="bg-vektor-darkblue hover:bg-vektor-blue"
               >
-                <Link to="/team/hovedstyret">
-                  Les mer om hovedstyret
-                </Link>
+                <Link to="/team/hovedstyret">Les mer om hovedstyret</Link>
               </Button>
             </div>
           )}
-
         </div>
         <div className="min-w-0 divide-y divide-solid">
           {department === "Hovedstyret" && membersPending && (

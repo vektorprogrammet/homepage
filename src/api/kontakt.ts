@@ -138,8 +138,9 @@ export type HovedstyreMemberOverview = {
   mail: string;
 };
 
-export async function fetchHovedstyreMemberDetails():
-  Promise<HovedstyreMemberOverview[]> {
+export async function fetchHovedstyreMemberDetails(): Promise<
+  Array<HovedstyreMemberOverview>
+> {
   const response = await fetch(
     "http://localhost:8080/teams/hovedstyret/contacts",
   );
@@ -148,12 +149,12 @@ export async function fetchHovedstyreMemberDetails():
     throw new Error(`Failed to fetch Hovedstyret: ${response.status}`);
   }
 
-  const members: {
+  const members: Array<{
     firstName: string;
     lastName: string;
     mail: string | null;
     title: string;
-  }[] = await response.json();
+  }> = await response.json();
 
   return members.map((member) => ({
     name: `${member.firstName} ${member.lastName}`,
@@ -163,7 +164,6 @@ export async function fetchHovedstyreMemberDetails():
 }
 
 function infoHovedstyret(): TeamInfo {
-
   return {
     name: "Hovedstyret",
     description:
