@@ -1,6 +1,3 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { getDepartmentOptions } from "./queries/department-queries";
-
 interface Faq {
   question: string;
   answer: string;
@@ -58,9 +55,7 @@ export function getAssistantFaqs(): Array<Faq> {
   ];
 }
 
-export function getTeamFaqs(): Array<Faq> {
-  const { data: departments = [], isPending, isError, } = useQuery(getDepartmentOptions());
-
+export function getTeamFaqs(regionsAnswer: string): Array<Faq> {
   return [
     {
       question: "Hvordan søker jeg team?",
@@ -80,7 +75,7 @@ export function getTeamFaqs(): Array<Faq> {
     },
     {
       question: "I hvilke regioner holder Vektorprogrammet til?",
-      answer: "Trondheim, Bergen og Ås",
+      answer: regionsAnswer,
     },
   ];
 }

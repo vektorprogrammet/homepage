@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Accordion,
   AccordionContent,
@@ -5,6 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getTeamFaqs } from "~/api/faq";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { Divider } from "~/components/divider";
 
 import { Outlet, useLocation } from "react-router";
@@ -39,7 +41,31 @@ function getTeam(): TeamPageInfo {
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team() {
   const teamInfo = getTeam();
-  const teamFaqs = getTeamFaqs();
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
+
+  let regionsAnswer: string;
+
+  if (isPending) {
+    regionsAnswer = "Henter regioner …";
+  } else if (isError) {
+    regionsAnswer = "Kunne ikke hente regionene. Prøv igjen senere.";
+  } else if (departments.length === 0) {
+    regionsAnswer = "Ingen regioner er tilgjengelige.";
+  } else {
+    const cityNames = departments.map((department) => department.city);
+
+    regionsAnswer = new Intl.ListFormat("nb-NO", {
+      style: "long",
+      type: "conjunction",
+    }).format(cityNames);
+  }
+
+
+  const teamFaqs = getTeamFaqs(regionsAnswer);
   const { pathname } = useLocation();
   const isTeamApplicationPage =
     pathname === "/team/soknad" || pathname === "/team/soknad/";
