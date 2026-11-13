@@ -1,3 +1,6 @@
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { getDepartmentOptions } from "./queries/department-queries";
+
 interface Faq {
   question: string;
   answer: string;
@@ -56,6 +59,8 @@ export function getAssistantFaqs(): Array<Faq> {
 }
 
 export function getTeamFaqs(): Array<Faq> {
+  const { data: departments = [], isPending, isError, } = useQuery(getDepartmentOptions());
+
   return [
     {
       question: "Hvordan søker jeg team?",
