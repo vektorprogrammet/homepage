@@ -2,15 +2,34 @@ import { useQuery } from "@tanstack/react-query";
 import { Mail, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, type To } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import type { TeamOverview } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { type DepartmentPretty, departments } from "~/lib/types";
+import { type DepartmentPretty } from "~/lib/types";
 
 export function TeamTabs({ department }: { department: DepartmentPretty }) {
-  const [activeTab, setActive] = useState<DepartmentPretty>(department);
+  const [activeTab, setActive] = useState<string>(department);
   const { data: teamOverviews } = useQuery(getTeamOptions());
+
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
+
+  if (isPending) {
+    return <output>Henter avdelinger …</output>;
+  }
+
+  if (isError) {
+    return (
+      <p role="alert">
+        Kunne ikke hente avdelingene. Prøv igjen senere.
+      </p>
+    );
+  }
 
   return (
     <div
@@ -19,7 +38,7 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
     >
       <div className="md:absolute md:left-3 lg:left-12">
         <TabMenu
-          tabs={Object.values(departments)}
+          tabs={[...departments.map((department) => department.city), "Hovedstyret"]}
           activeTab={activeTab}
           setActiveTab={setActive}
         />
