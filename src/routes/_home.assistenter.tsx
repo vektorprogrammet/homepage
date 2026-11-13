@@ -299,6 +299,33 @@ function CityTabs({ city }: { city: CityPretty }) {
 function CityApplyCard({ city, departmentId, }: { readonly city: CityPretty, readonly departmentId: number, }) {
   const { data: semester, isPending, isError } = useQuery(getCurrentSemesterByDepartmentOptions(departmentId));
 
+  let deadlineText: string;
+
+  if (isPending) {
+    deadlineText = "Henter søknadsfrist …";
+  } else if (isError) {
+    deadlineText = "Kunne ikke hente søknadsfristen";
+  } else if (!semester) {
+    deadlineText = "Søknadsfristen er utløpt";
+  } else {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const deadline = new Date(
+      `${semester.recruitmentEndDate}T00:00:00`,
+    );
+
+    if (deadline < today) {
+      deadlineText = "Søknadsfristen er utløpt";
+    } else {
+      deadlineText = `Søknadsfrist: ${deadline.toLocaleDateString("nb-NO", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })}`;
+    }
+  }
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -321,7 +348,7 @@ function CityApplyCard({ city, departmentId, }: { readonly city: CityPretty, rea
             <>
               <CardDescription className="mx-auto mb-7 flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/80 md:text-base">
                 <CalendarDays className="h-4 w-4 text-vektor-blue" />
-                Søknadsfrist publiseres snart
+                {deadlineText}
               </CardDescription>
               <CardContent className="px-5 pb-8 text-white sm:px-8">
                 <form
