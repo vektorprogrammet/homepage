@@ -1,16 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Users } from "lucide-react";
-import { useState } from "react";
-import { Link, NavLink, type To } from "react-router";
+import { useEffect } from "react";
+import { Link, NavLink, type To, href, useNavigate } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import type { TeamOverview } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { type DepartmentPretty } from "~/lib/types";
 
-export function TeamTabs({ department }: { department: DepartmentPretty }) {
-  const [activeTab, setActive] = useState<string>(department);
+export function TeamTabs({
+  departmentSlug,
+}: {
+  readonly departmentSlug?: string;
+}) {
+  const navigate = useNavigate();
   const { data: teamOverviews } = useQuery(getTeamOptions());
 
   const {
@@ -18,6 +21,17 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
     isPending,
     isError,
   } = useQuery(getDepartmentOptions());
+
+  const defaultDepartmentSlug = departments[0]?.slug;
+
+  useEffect(() => {
+    if (!departmentSlug && !isPending && !isError && defaultDepartmentSlug) {
+      navigate(
+        href("/team/:department", { department: defaultDepartmentSlug }),
+        { replace: true, preventScrollReset: true },
+      );
+    }
+  }, [departmentSlug, defaultDepartmentSlug, isPending, isError, navigate]);
 
   if (isPending) {
     return <output>Henter avdelinger …</output>;
@@ -31,6 +45,17 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
     );
   }
 
+  const isHovedstyret = departmentSlug === "hovedstyret";
+  const selectedDepartment = departmentSlug
+    ? departments.find((department) => department.slug === departmentSlug)
+    : departments[0];
+
+  if (!isHovedstyret && !selectedDepartment) {
+    return <p>Fant ikke avdelingen.</p>;
+  }
+
+  const activeTab = isHovedstyret ? "Hovedstyret" : selectedDepartment?.city ?? "";
+
   return (
     <div
       className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row"
@@ -40,22 +65,36 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
         <TabMenu
           tabs={[...departments.map((department) => department.city), "Hovedstyret"]}
           activeTab={activeTab}
-          setActiveTab={setActive}
+          setActiveTab={(city) => {
+            if (city === "Hovedstyret") {
+              navigate(`${href("/team")}?department=hovedstyret`, { preventScrollReset: true });
+              return;
+            }
+
+            const selected = departments.find((department) => department.city === city);
+            if (selected) {
+              navigate(
+                href("/team/:department", { department: selected.slug }),
+                { preventScrollReset: true },
+              );
+            }
+          }}
         />
       </div>
       <div className="flex w-full max-w-5xl flex-col items-start">
-        {activeTab === "Hovedstyret" ? (
+        {isHovedstyret ? (
           <HovedstyretTab
             overview={teamOverviews.find(
-              (teamOverview) => teamOverview.team.name === "Hovedstyret",
+              (overview) => overview.team.name === "Hovedstyret",
             )}
           />
-        ) : (
+        ) : selectedDepartment && (
           <TeamTab
+            departmentSlug={selectedDepartment.slug}
             overviews={teamOverviews.filter(
-              (teamOverview) =>
-                teamOverview.departmentCity === activeTab &&
-                teamOverview.team.name !== "Hovedstyret",
+              (overview) =>
+                overview.team.departmentId === selectedDepartment.id &&
+                overview.team.name !== "Hovedstyret",
             )}
           />
         )}
@@ -64,7 +103,7 @@ export function TeamTabs({ department }: { department: DepartmentPretty }) {
   );
 }
 
-function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
+function HovedstyretTab({ overview }: { readonly overview?: TeamOverview }) {
   return (
     <div className="flex flex-col md:ml-24 md:max-w-2xl md:flex-row lg:ml-16 xl:ml-auto">
       <div className="flex-1 object-contain">
@@ -90,7 +129,7 @@ function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
         <br />
         <NavLink
           type="button"
-          to={`/team/${overview?.team.name.toLowerCase()}`}
+          to="/team/hovedstyret"
           className="rounded border border-blue-500 bg-transparent px-4 py-2 font-semibold text-blue-700 transition duration-300 hover:border-transparent hover:bg-blue-500 hover:text-white dark:bg-vektor-darkblue dark:text-white dark:hover:bg-blue-600"
           prefetch="intent"
         >
@@ -108,7 +147,13 @@ function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
   );
 }
 
-function TeamTab({ overviews }: { overviews: Array<TeamOverview> }) {
+function TeamTab({
+  overviews,
+  departmentSlug,
+}: {
+  readonly overviews: Array<TeamOverview>;
+  readonly departmentSlug: string;
+}) {
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {overviews.map((overview) => (
@@ -119,7 +164,10 @@ function TeamTab({ overviews }: { overviews: Array<TeamOverview> }) {
           mail={overview.team.email}
           numberOfMembers={overview.memberCount}
           buttonName="Les mer"
-          url={`/team/${overview.departmentCity === "Ås" ? "aas" : overview.departmentCity}/${overview.team.name === "Økonomi" ? "okonomi" : overview.team.name}`.toLowerCase()}
+          url={href("/team/:department/:team", {
+            department: departmentSlug,
+            team: (overview.team.name === "Økonomi" ? "okonomi" : overview.team.name).toLowerCase(),
+          })}
         />
       ))}
     </div>
