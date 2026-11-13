@@ -30,7 +30,7 @@ import { getAssistantFaqs } from "~/api/faq";
 import { Divider } from "~/components/divider";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { type City, type CityPretty, cities } from "~/lib/types";
+import { type CityPretty, cities } from "~/lib/types";
 
 import {
   Command,
@@ -51,26 +51,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
+import { getCurrentSemesterByDepartmentOptions } from "~/api/queries/semester-queries";
 import { studyOptions } from "~/lib/studies";
 
 const studies = studyOptions.map((value) => ({ value, label: value }));
-
-/* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
-const cityApplicationOpen: Record<City, boolean> = {
-  trondheim: true,
-  bergen: false,
-  aas: false,
-};
-
-/* Should be updated when cityApplicationOpen is changed. */
-const isApplicationOpen = (cityPretty: CityPretty) => {
-  // convert pretty label back to the City key
-  const cityKey = (Object.keys(cities) as Array<City>).find(
-    (key) => cities[key] === cityPretty,
-  );
-  return cityKey ? cityApplicationOpen[cityKey] : false;
-};
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Assistenter() {
@@ -268,6 +255,15 @@ export default function Assistenter() {
 }
 function CityTabs({ city }: { city: CityPretty }) {
   const [active, setActive] = useState<CityPretty>(city);
+  const {
+    data: departments = [],
+    isPending: departmentsPending,
+    isError: departmentsError,
+  } = useQuery(getDepartmentOptions());
+
+  const selectedDepartment = departments.find(
+    (department) => department.city === active,
+  );
 
   return (
     <div className="relative mx-auto w-full max-w-6xl" role="tablist">
@@ -280,17 +276,61 @@ function CityTabs({ city }: { city: CityPretty }) {
         />
       </div>
       <div className="mx-auto w-full min-w-0 max-w-3xl">
-        <CityApplyCard city={active} />
+        {departmentsPending && <output>Henter avdelinger …</output>}
+        {departmentsError && (
+          <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>
+        )}
+        {!departmentsPending && !departmentsError && !selectedDepartment && (
+          <p>Fant ikke avdelingen.</p>
+        )}
+        {selectedDepartment && !departmentsError && (
+          <CityApplyCard city={active} departmentId={selectedDepartment.id} />
+        )}
       </div>
     </div>
   );
 }
 
-function CityApplyCard({ city }: { city: CityPretty }) {
+function CityApplyCard({
+  city,
+  departmentId,
+}: {
+  readonly city: CityPretty;
+  readonly departmentId: number;
+}) {
+  const {
+    data: semester,
+    isPending,
+    isError,
+  } = useQuery(getCurrentSemesterByDepartmentOptions(departmentId));
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  const openNow = isApplicationOpen(city);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const deadline = semester
+    ? new Date(`${semester.recruitmentEndDate}T00:00:00`)
+    : null;
+
+  const openNow =
+    !isPending && !isError && deadline !== null && deadline >= today;
+
+  const formattedDeadline = deadline?.toLocaleDateString("nb-NO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  let statusMessage = `Søknadsperioden for ${city} er dessverre stengt for semesteret. Vennligst kom tilbake senere for oppdateringer om fremtidige søknadsperioder.`;
+  if (isPending) {
+    statusMessage = "Henter søknadsfrist …";
+  } else if (isError) {
+    statusMessage = "Kunne ikke hente søknadsfristen. Prøv igjen senere.";
+  } else if (!semester) {
+    statusMessage = "Ingen søknadsperiode er publisert.";
+  }
 
   return (
     <Tabs value={city} className="w-full">
@@ -305,11 +345,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
               Vektorassistent i {city}
             </CardTitle>
           </CardHeader>
-          {openNow /* CardContent when the application period for the current city is closed */ ? (
+          {openNow ? (
             <>
               <CardDescription className="mx-auto mb-7 flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/80 md:text-base">
                 <CalendarDays className="h-4 w-4 text-vektor-blue" />
-                Søknadsfrist publiseres snart
+                Søknadsfrist: {formattedDeadline}
               </CardDescription>
               <CardContent className="px-5 pb-8 text-white sm:px-8">
                 <form
@@ -532,9 +572,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                 <CalendarDays className="h-6 w-6" aria-hidden="true" />
               </div>
               <p className="mx-auto max-w-xl text-center text-base text-white/80 md:text-lg">
-                Søknadsperioden for {city} er dessverre stengt for semesteret.
-                Vennligst kom tilbake senere for oppdateringer om fremtidige
-                søknadsperioder.
+                {statusMessage}
               </p>
             </CardContent>
           )}
