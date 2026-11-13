@@ -2,25 +2,27 @@ import { trimTrailingSlashes } from "~/lib/url";
 
 type Semester = {
   id: number;
-  lastSemesterId: number;
-  semesterStartDate: Date;
-  semesterEndDate: Date;
-  recruitmentStartDate: Date;
-  recruitmentEndDate: Date;
+  lastSemesterId: number | null;
+  semesterStartDate: string;
+  semesterEndDate: string;
+  recruitmentStartDate: string;
+  recruitmentEndDate: string;
   departmentId: number;
   name: string;
 };
 
 export async function fetchCurrentSemesterByDepartment(
   departmentId: number,
-): Promise<Semester> {
+): Promise<Semester | null> {
   const baseUrl = import.meta.env.VITE_API_URL;
 
   if (!baseUrl) {
     throw new Error("VITE_API_URL is not configured");
   }
 
-  const response = await fetch(`${trimTrailingSlashes(baseUrl)}/semesters/current/${departmentId}`);
+  const response = await fetch(
+    `${trimTrailingSlashes(baseUrl)}/semesters/current/${departmentId}`,
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch semesters: ${response.status}`);
