@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useQuery } from "@tanstack/react-query";
 import { getTeamFaqs } from "~/api/faq";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { Divider } from "~/components/divider";
@@ -63,7 +63,6 @@ export default function Team() {
       type: "conjunction",
     }).format(cityNames);
   }
-
 
   const teamFaqs = getTeamFaqs(regionsAnswer);
   const { pathname } = useLocation();
