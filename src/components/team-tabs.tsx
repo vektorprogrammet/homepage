@@ -58,10 +58,10 @@ export function TeamTabs({
 
   return (
     <div
-      className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row"
+      className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row lg:relative lg:w-[544px] xl:w-[832px]"
       role="tablist"
     >
-      <div className="md:absolute md:left-3 lg:left-12">
+      <div className="md:absolute md:left-3 lg:left-auto lg:right-full lg:mr-8">
         <TabMenu
           tabs={[...departments.map((department) => department.city), "Hovedstyret"]}
           activeTab={activeTab}
