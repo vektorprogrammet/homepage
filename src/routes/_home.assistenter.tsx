@@ -52,9 +52,20 @@ import {
 } from "@/components/ui/popover";
 
 import React from "react";
+import {
+  type Application,
+  genders,
+  isValidApplication,
+  isValidLiteral,
+  sendAssistantApplication,
+  yearsOfStudy,
+} from "~/api/send-application";
 import { studyOptions } from "~/lib/studies";
 
-const studies = studyOptions.map((value) => ({ value, label: value }));
+const studies = Object.entries(studyOptions).map(([label, value]) => ({
+  value,
+  label,
+}));
 
 /* Placeholder values for application period until it can retrieve it from the database. Will be removed by a logic test checking whether the current date is between the RecruitmentStartDate and RecruitmentStopDate for the current semester and chosen city, or not. */
 const cityApplicationOpen: Record<City, boolean> = {
@@ -288,7 +299,20 @@ function CityTabs({ city }: { city: CityPretty }) {
 
 function CityApplyCard({ city }: { city: CityPretty }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [formData, setFormData] = React.useState<Partial<Application>>({
+    semester: 1,
+  });
+  function handleInputChange<T extends keyof Application>(
+    name: T,
+    value: Application[T],
+  ) {
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  }
 
   const openNow = isApplicationOpen(city);
 
@@ -315,6 +339,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                 <form
                   id="assistant-application-form"
                   className="grid gap-5 sm:grid-cols-2"
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (isValidApplication(formData)) {
+                      await sendAssistantApplication(formData);
+                    }
+                  }}
                 >
                   <div className="space-y-2">
                     <Label htmlFor="fornavn" className="text-base text-white">
@@ -334,6 +364,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("firstName", e.target.value);
                       }}
                     />
                   </div>
@@ -355,6 +386,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("lastName", e.target.value);
                       }}
                     />
                   </div>
@@ -377,6 +409,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("email", e.target.value);
                       }}
                     />
                   </div>
@@ -400,6 +433,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           "",
                         );
                         e.target.value = cleanedValue;
+                        handleInputChange("phonenumber", e.target.value);
                       }}
                     />
                   </div>
@@ -416,9 +450,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                           aria-expanded={open}
                           className="h-12 w-full justify-between rounded-lg border-white/15 bg-white px-3 font-normal text-gray-950 text-sm hover:bg-gray-50 hover:text-gray-950 focus-visible:ring-vektor-blue"
                         >
-                          {value
-                            ? studies.find((studies) => studies.value === value)
-                                ?.label
+                          {formData.fieldOfStudyId
+                            ? studies.find(
+                                (studies) =>
+                                  studies.value === formData.fieldOfStudyId,
+                              )?.label
                             : "Velg studieretning"}
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
@@ -434,12 +470,11 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                               {studies.map((studies) => (
                                 <CommandItem
                                   key={studies.value}
-                                  value={studies.value}
-                                  onSelect={(currentValue) => {
-                                    setValue(
-                                      currentValue === value
-                                        ? ""
-                                        : currentValue,
+                                  value={String(studies.value)}
+                                  onSelect={(newValue) => {
+                                    handleInputChange(
+                                      "fieldOfStudyId",
+                                      Number(newValue),
                                     );
                                     setOpen(false);
                                   }}
@@ -447,7 +482,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                                   {studies.label}
                                   <Check
                                     className={cn(
-                                      value === studies.value
+                                      formData.fieldOfStudyId === studies.value
                                         ? "opacity-100"
                                         : "opacity-0",
                                     )}
@@ -464,7 +499,14 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Label htmlFor="gender" className="text-base text-white">
                       Kjønn
                     </Label>
-                    <Select name="gender">
+                    <Select
+                      name="gender"
+                      onValueChange={(newValue) => {
+                        if (isValidLiteral(genders, newValue)) {
+                          handleInputChange("gender", newValue);
+                        }
+                      }}
+                    >
                       <SelectTrigger
                         id="gender"
                         className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
@@ -475,6 +517,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                         <SelectItem value="male">Mann</SelectItem>
                         <SelectItem value="female">Kvinne</SelectItem>
                         <SelectItem value="other">Annet</SelectItem>
+                        <SelectItem value="withheld">Vil ikke oppgi</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -482,7 +525,14 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                     <Label htmlFor="grade" className="text-base text-white">
                       Årstrinn
                     </Label>
-                    <Select name="grade">
+                    <Select
+                      name="grade"
+                      onValueChange={(newValue) => {
+                        if (isValidLiteral(yearsOfStudy, newValue)) {
+                          handleInputChange("yearOfStudy", newValue);
+                        }
+                      }}
+                    >
                       <SelectTrigger
                         id="grade"
                         className="h-12 rounded-lg border-white/15 bg-white text-gray-950 focus:ring-vektor-blue"
@@ -490,11 +540,12 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                         <SelectValue placeholder="Velg årstrinn" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="firstGrade">1. klasse</SelectItem>
-                        <SelectItem value="secondGrade">2. klasse</SelectItem>
-                        <SelectItem value="thirdGrade">3. klasse</SelectItem>
-                        <SelectItem value="fourthGrade">4. klasse</SelectItem>
-                        <SelectItem value="fifthGrade">5. klasse</SelectItem>
+                        <SelectItem value="1">1. år</SelectItem>
+                        <SelectItem value="2">2. år</SelectItem>
+                        <SelectItem value="3">3. år</SelectItem>
+                        <SelectItem value="4">4. år</SelectItem>
+                        <SelectItem value="5">5. år</SelectItem>
+                        <SelectItem value="6<=">Over 5 år</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
