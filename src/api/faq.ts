@@ -55,7 +55,7 @@ export function getAssistantFaqs(): Array<Faq> {
   ];
 }
 
-export function getTeamFaqs(): Array<Faq> {
+export function getTeamFaqs(regionsAnswer: string): Array<Faq> {
   return [
     {
       question: "Hvordan søker jeg team?",
@@ -75,7 +75,7 @@ export function getTeamFaqs(): Array<Faq> {
     },
     {
       question: "I hvilke regioner holder Vektorprogrammet til?",
-      answer: "Trondheim, Bergen og Ås",
+      answer: regionsAnswer,
     },
   ];
 }
