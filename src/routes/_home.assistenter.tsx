@@ -53,6 +53,9 @@ import {
 
 import React from "react";
 import { studyOptions } from "~/lib/studies";
+import { useQuery } from "@tanstack/react-query";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
+import { getCurrentSemesterByDepartmentOptions } from "~/api/queries/semester-queries";
 
 const studies = studyOptions.map((value) => ({ value, label: value }));
 
@@ -268,6 +271,11 @@ export default function Assistenter() {
 }
 function CityTabs({ city }: { city: CityPretty }) {
   const [active, setActive] = useState<CityPretty>(city);
+  const { data: departments = [] } = useQuery(getDepartmentOptions());
+
+  const selectedDepartment = departments.find(
+    (department) => department.city === active,
+  );
 
   return (
     <div className="relative mx-auto w-full max-w-6xl" role="tablist">
@@ -280,13 +288,17 @@ function CityTabs({ city }: { city: CityPretty }) {
         />
       </div>
       <div className="mx-auto w-full min-w-0 max-w-3xl">
-        <CityApplyCard city={active} />
+        {selectedDepartment && (
+          <CityApplyCard city={active} departmentId={selectedDepartment.id} />
+        )}
       </div>
     </div>
   );
 }
 
-function CityApplyCard({ city }: { city: CityPretty }) {
+function CityApplyCard({ city, departmentId, }: { readonly city: CityPretty, readonly departmentId: number, }) {
+  const { data: semester, isPending, isError } = useQuery(getCurrentSemesterByDepartmentOptions(departmentId));
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -418,7 +430,7 @@ function CityApplyCard({ city }: { city: CityPretty }) {
                         >
                           {value
                             ? studies.find((studies) => studies.value === value)
-                                ?.label
+                              ?.label
                             : "Velg studieretning"}
                           <ChevronsUpDown className="opacity-50" />
                         </Button>
