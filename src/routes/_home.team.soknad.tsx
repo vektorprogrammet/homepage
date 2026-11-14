@@ -1,6 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -116,6 +118,14 @@ export default function TeamApplicationPage() {
   const isApplicationOpen =
     applicationOpenByCityAndTeam[selectedCity]?.[selectedTeam] ?? false;
 
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+
+  const {
+    data: departments = [],
+    isPending: departmentsPending,
+    isError: departmentsError,
+  } = useQuery(getDepartmentOptions());
+
   return (
     <section className="mx-auto mb-20 w-full max-w-5xl px-4">
       <h2 className="text-center font-bold text-3xl text-vektor-DARKblue md:text-4xl">
@@ -132,20 +142,37 @@ export default function TeamApplicationPage() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="department">Avdeling</Label>
-              <Select name="department">
+              <Select
+                name="department"
+                value={selectedDepartmentId}
+                onValueChange={setSelectedDepartmentId}
+                disabled={departmentsPending || departmentsError}
+                required
+              >
                 <SelectTrigger
                   id="department"
                   className="w-full bg-white text-black data-[placeholder]:text-gray-500"
                 >
-                  <SelectValue placeholder="Velg avdeling" />
+                  <SelectValue placeholder={departmentsPending ? "Henter avdelinger ..." : "Velg avdeling"} />
                 </SelectTrigger>
 
                 <SelectContent className="bg-white text-vektor-darkblue">
-                  <SelectItem value="empty" disabled>
-                    Ingen avdelinger lagt til ennå
-                  </SelectItem>
+                  {departments.map((department) => (
+                    <SelectItem
+                      key={department.id}
+                      value={String(department.id)}
+                    >
+                      {department.city}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+
+              {departmentsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente avdelingene. Prøv igjen senere.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
