@@ -7,6 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getTeamFaqs } from "~/api/faq";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
+import { getTeamOptions } from "~/api/queries/team-queries";
 import { Divider } from "~/components/divider";
 
 import { Outlet, useLocation } from "react-router";
@@ -23,11 +24,16 @@ type TeamPageInfo = {
   sectionTitle: string;
 };
 
-function getTeam(): TeamPageInfo {
+function getTeam(regionCount?: number, teamCount?: number): TeamPageInfo {
+  const regions = regionCount === undefined
+    ? "norske byer"
+    : `${regionCount} norske ${regionCount === 1 ? "by" : "byer"}`;
+  const teams = teamCount === undefined ? "team" : `${teamCount} team`;
+
   return {
     title: "Styre og team",
     text1:
-      "Vektorprogrammet er en stor organisasjon med assistenter i 3 norske byer. Vi trenger derfor mange frivillige bak kulissene som kan få hjulene til å gå rundt. Uten Vektorprogrammets 15 team hadde dette aldri gått an! ",
+      `Vektorprogrammet er en stor organisasjon med assistenter i ${regions}. Vi trenger derfor mange frivillige bak kulissene som kan få hjulene til å gå rundt. Uten Vektorprogrammets ${teams} hadde dette aldri gått an! `,
     text2: "Kunne du tenkt deg et team-verv hos oss?",
     text3: "Les mer om de ulike teamene nedenfor!",
     image: {
@@ -40,12 +46,25 @@ function getTeam(): TeamPageInfo {
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team() {
-  const teamInfo = getTeam();
   const {
     data: departments = [],
     isPending,
     isError,
   } = useQuery(getDepartmentOptions());
+
+  const {
+    data: teamOverviews,
+    isFetched: teamsFetched,
+    isError: teamsError,
+  } = useQuery(getTeamOptions());
+
+  const regionCount = !isPending && !isError
+    ? departments.filter((department) => department.slug !== "hovedstyret").length
+    : undefined;
+  const teamCount = teamsFetched && !teamsError
+    ? teamOverviews.length
+    : undefined;
+  const teamInfo = getTeam(regionCount, teamCount);
 
   let regionsAnswer: string;
 
