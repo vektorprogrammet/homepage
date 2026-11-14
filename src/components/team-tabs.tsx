@@ -193,7 +193,7 @@ function Division({
   return (
     <NavLink
       className={
-        "flex h-48 w-64 flex-col justify-between rounded-md bg-vektor-light-blue shadow-md dark:bg-gray-600 dark:text-white"
+        "flex h-48 w-64 flex-col justify-between rounded-md bg-vektor-light-blue shadow-md dark:bg-gray-600 dark:text-white transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
       }
       to={url}
       prefetch="intent"
