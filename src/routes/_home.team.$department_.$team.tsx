@@ -1,5 +1,14 @@
 import { TeamTemplate } from "@/components/team-template";
+import { getFullTeamOptions } from "~/api/queries/team-queries";
+import { getQueryClient } from "~/lib/query-client";
 import type { Route } from "./+types/_home.team.$department_.$team";
+
+export async function clientLoader({ params }: Route.ClientLoaderArgs) {
+  await getQueryClient().ensureQueryData(
+    getFullTeamOptions(params.department, params.team),
+  );
+  return null;
+}
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Team({ params }: Route.ComponentProps) {

@@ -1,5 +1,15 @@
 import { TeamTemplate } from "@/components/team-template";
 
+import { getFullTeamOptions } from "~/api/queries/team-queries";
+import { getQueryClient } from "~/lib/query-client";
+
+export async function clientLoader() {
+  await getQueryClient().ensureQueryData(
+    getFullTeamOptions("trondheim", "hovedstyret"),
+  );
+  return null;
+}
+
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Hovedstyret() {
   return (

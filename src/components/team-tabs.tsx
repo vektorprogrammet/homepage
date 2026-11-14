@@ -196,6 +196,7 @@ function Division({
         "flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue sm:h-48 shadow-md dark:bg-gray-600 dark:text-white transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
       }
       to={url}
+      preventScrollReset
       prefetch="intent"
     >
       <div className="flex h-48 flex-col justify-between sm:h-full">
