@@ -10,7 +10,7 @@ import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import { Divider } from "~/components/divider";
 
-import { Outlet, useLocation } from "react-router";
+import { href, Link, Outlet, useLocation } from "react-router";
 
 type TeamPageInfo = {
   title: string;
@@ -61,7 +61,7 @@ export default function Team() {
   const regionCount =
     !isPending && !isError
       ? departments.filter((department) => department.slug !== "hovedstyret")
-          .length
+        .length
       : undefined;
   const teamCount =
     teamsFetched && !teamsError ? teamOverviews.length : undefined;
@@ -106,7 +106,18 @@ export default function Team() {
             {teamInfo.text2}
             {!isTeamApplicationPage && (
               <div className="mt-6">
-                <strong>{teamInfo.text3}</strong>
+                {!isTeamApplicationPage && (
+                  <div className="mt-6">
+                    <Link
+                      to={href("/team/soknad")}
+                      className="mb-3 block w-fit font-medium text-vektor-darkblue underline underline-offset-4 transition-colors hover:text-vektor-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue"
+                    >
+                      Gå til søknadsskjemaet →
+                    </Link>
+
+                    <strong>{teamInfo.text3}</strong>
+                  </div>
+                )}
               </div>
             )}
           </div>
