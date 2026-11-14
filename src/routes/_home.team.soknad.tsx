@@ -293,7 +293,7 @@ export default function TeamApplicationPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-end gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <Label htmlFor="email">{"E-post"}</Label>
@@ -325,6 +325,23 @@ export default function TeamApplicationPage() {
                 }}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="gender">Kjønn</Label>
+            <Select name="gender">
+              <SelectTrigger
+                id="gender"
+                className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+              >
+                <SelectValue placeholder="Velg kjønn" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Mann</SelectItem>
+                <SelectItem value="female">Kvinne</SelectItem>
+                <SelectItem value="other">Annet</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
