@@ -225,11 +225,35 @@ export default function TeamApplicationPage() {
                 </SelectTrigger>
 
                 <SelectContent className="bg-white text-vektor-darkblue">
-                  {availableTeams.map(({ team }) => (
-                    <SelectItem key={team.id} value={String(team.id)}>
-                      {team.name}
-                    </SelectItem>
-                  ))}
+                  {availableTeams.map(({ team }) => {
+                    const deadline = team.deadline
+                      ? new Date(team.deadline)
+                      : null;
+
+                    const isOpen =
+                      team.acceptApplication &&
+                      deadline !== null &&
+                      deadline.getTime() >= Date.now();
+
+                    const deadlineLabel = deadline?.toLocaleDateString(
+                      "nb-NO",
+                      {
+                        day: "numeric",
+                        month: "long",
+                      },
+                    );
+
+                    return (
+                      <SelectItem
+                        key={team.id}
+                        value={String(team.id)}
+                        disabled={!isOpen}
+                      >
+                        {team.name} —{" "}
+                        {isOpen ? `frist ${deadlineLabel}` : "opptak stengt"}
+                      </SelectItem>
+                    );
+                  })}{" "}
                 </SelectContent>
               </Select>
 
