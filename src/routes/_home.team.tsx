@@ -61,7 +61,7 @@ export default function Team() {
   const regionCount =
     !isPending && !isError
       ? departments.filter((department) => department.slug !== "hovedstyret")
-          .length
+        .length
       : undefined;
   const teamCount =
     teamsFetched && !teamsError ? teamOverviews.length : undefined;
@@ -94,7 +94,7 @@ export default function Team() {
 
   return (
     <div className="mx-auto mt-20 mb-20 flex w-full max-w-6xl flex-col items-center">
-      <header className="mx-auto flex w-full flex-wrap justify-around">
+      <header className={`mx-auto w-full flex-wrap justify-around ${isTeamApplicationPage ? "hidden" : "flex"}`}>
         <div className="mt-5 flex max-w-6xl flex-col">
           <h2 className="mx-3 font-bold text-4xl text-gray-600 dark:text-gray-200">
             {teamInfo.title}
@@ -128,11 +128,13 @@ export default function Team() {
           />
         </div>
       </header>
-      {!isTeamApplicationPage && (
-        <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
-          {teamInfo.sectionTitle}
-        </h1>
-      )}
+      {
+        !isTeamApplicationPage && (
+          <h1 className="mx-auto mt-10 mb-10 max-w-lg text-center font-bold text-5xl text-gray-600 dark:text-gray-200">
+            {teamInfo.sectionTitle}
+          </h1>
+        )
+      }
       <Outlet />
       <Divider />
 
@@ -156,6 +158,6 @@ export default function Team() {
           </Accordion>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
