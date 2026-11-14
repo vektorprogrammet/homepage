@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
+import { getTeamOptions } from "~/api/queries/team-queries";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -100,6 +101,8 @@ export default function TeamApplicationPage() {
   const [grade, setGrade] = useState("firstGrade");
   const [lineOpen, setLineOpen] = useState(false);
   const [lineValue, setLineValue] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState("");
   const { search } = useLocation();
 
   // Reads the selected city/team from URL, e.g. /team/soknad?city=trondheim&team=it
@@ -118,13 +121,26 @@ export default function TeamApplicationPage() {
   const isApplicationOpen =
     applicationOpenByCityAndTeam[selectedCity]?.[selectedTeam] ?? false;
 
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
-
   const {
     data: departments = [],
     isPending: departmentsPending,
     isError: departmentsError,
   } = useQuery(getDepartmentOptions());
+
+  const {
+    data: teamOverviews = [],
+    isFetching: teamsFetching,
+    isError: teamsError,
+  } = useQuery(getTeamOptions());
+
+  const availableTeams = teamOverviews.filter(
+    ({ team }) =>
+      team.departmentId === Number(selectedDepartmentId) &&
+      team.name !== "Hovedstyret" &&
+      team.name !== "Styret",
+  );
+
+  const teamsLoading = teamsFetching && teamOverviews.length === 0;
 
   return (
     <section className="mx-auto mb-20 w-full max-w-5xl px-4">
@@ -145,7 +161,10 @@ export default function TeamApplicationPage() {
               <Select
                 name="department"
                 value={selectedDepartmentId}
-                onValueChange={setSelectedDepartmentId}
+                onValueChange={(departmentId) => {
+                  setSelectedDepartmentId(departmentId);
+                  setSelectedTeamId("");
+                }}
                 disabled={departmentsPending || departmentsError}
                 required
               >
@@ -153,7 +172,13 @@ export default function TeamApplicationPage() {
                   id="department"
                   className="w-full bg-white text-black data-[placeholder]:text-gray-500"
                 >
-                  <SelectValue placeholder={departmentsPending ? "Henter avdelinger ..." : "Velg avdeling"} />
+                  <SelectValue
+                    placeholder={
+                      departmentsPending
+                        ? "Henter avdelinger ..."
+                        : "Velg avdeling"
+                    }
+                  />
                 </SelectTrigger>
 
                 <SelectContent className="bg-white text-vektor-darkblue">
@@ -177,21 +202,42 @@ export default function TeamApplicationPage() {
 
             <div className="space-y-2">
               <Label htmlFor="team">Team</Label>
-              <Select name="team">
+              <Select
+                name="team"
+                value={selectedTeamId}
+                onValueChange={setSelectedTeamId}
+                disabled={!selectedDepartmentId || teamsLoading || teamsError}
+                required
+              >
                 <SelectTrigger
                   id="team"
                   className="w-full bg-white text-black data-[placeholder]:text-gray-500"
-
                 >
-                  <SelectValue placeholder="Velg team" />
+                  <SelectValue
+                    placeholder={
+                      selectedDepartmentId
+                        ? teamsLoading
+                          ? "Henter team ..."
+                          : "Velg team"
+                        : "Velg avdeling først"
+                    }
+                  />
                 </SelectTrigger>
 
                 <SelectContent className="bg-white text-vektor-darkblue">
-                  <SelectItem value="empty" disabled>
-                    Ingen team lagt til ennå
-                  </SelectItem>
+                  {availableTeams.map(({ team }) => (
+                    <SelectItem key={team.id} value={String(team.id)}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+
+              {teamsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente teamene. Prøv igjen senere.
+                </p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
