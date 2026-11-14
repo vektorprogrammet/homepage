@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
+import { Link, href } from "react-router";
 import { getFullTeamOptions } from "~/api/queries/team-queries";
 import { TeamTemplateDescription } from "./team-template-description";
 
@@ -23,11 +25,25 @@ export function TeamTemplate({
     return <p>Kunne ikke hente teammedlemmer.</p>;
   }
 
+  const overviewUrl = team === "hovedstyret"
+    ? `${href("/team")}?department=hovedstyret`
+    : href("/team/:department", { department });
+
   return (
     <div>
-      <h1 className="text-center font-bold text-4xl text-vektor-darblue">
-        {fullTeam.team.name}
-      </h1>
+      <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+        <Link
+          to={overviewUrl}
+          preventScrollReset
+          className="inline-flex items-center justify-self-center md:justify-self-start gap-2 rounded-md px-2 py-2 font-medium text-sm text-vektor-darkblue transition-colors hover:text-vektor-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue dark:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Tilbake til oversikten
+        </Link>
+        <h1 className="break-words text-center font-bold text-4xl text-vektor-darblue md:col-start-2 md:row-start-1">
+          {fullTeam.team.name}
+        </h1>
+      </div>
       <div className="mt-5 text-center font-bold text-base text-vektor-darblue">
         {"Epost: "}
         <a
