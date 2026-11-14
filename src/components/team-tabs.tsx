@@ -166,6 +166,8 @@ function TeamTab({
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {overviews.map((overview) => (
         <Division
+          departmentId={overview.team.departmentId}
+          teamId={overview.team.id}
           key={overview.team.id}
           title={overview.team.name}
           text={overview.team.shortDescription}
@@ -188,12 +190,16 @@ function TeamTab({
 /* Division */
 
 function Division({
+  departmentId,
+  teamId,
   title,
   text,
   numberOfMembers,
   deadline,
   url,
 }: {
+  departmentId: number;
+  teamId: number;
   title: string;
   text: string;
   mail: string;
@@ -203,6 +209,13 @@ function Division({
 }) {
   const showApplyButton =
     deadline != null && Date.now() <= new Date(deadline).getTime();
+
+  const applicationParams = new URLSearchParams({
+    department: String(departmentId),
+    team: String(teamId),
+  });
+
+  const applicationUrl = `${href("/team/soknad")}?${applicationParams.toString()}`;
 
   return (
     <div
@@ -239,7 +252,7 @@ function Division({
               variant="green"
               asChild
             >
-              <Link to={href("/team/soknad")}>Søk nå!</Link>
+              <Link to={applicationUrl}>Søk nå!</Link>
             </Button>
           )}
         </div>{" "}

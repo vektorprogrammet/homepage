@@ -1,6 +1,9 @@
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
-import { useLocation } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Check, ChevronsUpDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, href, useSearchParams } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
+import { getTeamOptions } from "~/api/queries/team-queries";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -30,108 +33,247 @@ import { cn } from "~/lib/utils";
 
 const studies = studyOptions.map((value) => ({ value, label: value }));
 
-const cityLabels = {
-  trondheim: "Trondheim",
-  bergen: "Bergen",
-  aas: "Ås",
-} as const;
-
-const teamLabels: Record<string, string> = {
-  styret: "Styret",
-  it: "IT",
-  evaluering: "Evaluering",
-  okonomi: "Økonomi",
-  profilering: "Profilering",
-  rekruttering: "Rekruttering",
-  skolekoordinering: "Skolekoordinering",
-  sponsor: "Sponsor",
-  sosialt: "Sosialt",
-  "sponsor-okonomi": "Sponsor og Økonomi",
-  "evaluering-rekruttering-profilering":
-    "Evaluering, Rekruttering og Profilering",
-};
-
-/* Placeholder values until application status can be fetched from backend. */
-const applicationOpenByCityAndTeam: Record<string, Record<string, boolean>> = {
-  trondheim: {
-    styret: false,
-    it: true,
-    evaluering: false,
-    okonomi: false,
-    profilering: true,
-    rekruttering: false,
-    skolekoordinering: false,
-    sponsor: false,
-  },
-  bergen: {
-    styret: false,
-    skolekoordinering: false,
-    rekruttering: false,
-  },
-  aas: {
-    styret: false,
-    "sponsor-okonomi": false,
-    skolekoordinering: false,
-    "evaluering-rekruttering-profilering": false,
-    sosialt: false,
-  },
-};
-
-function normalizeSelection(value: string | null, fallback: string) {
-  if (!value) return fallback;
-  const normalized = value.trim().toLowerCase();
-  return normalized === "ås" ? "aas" : normalized;
-}
-
-function formatTeamLabel(team: string) {
-  return (
-    teamLabels[team] ??
-    team
-      .split("-")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ")
-  );
-}
-
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function TeamApplicationPage() {
+  const [searchParams] = useSearchParams();
+  const handledSearch = useRef<string | null>(null);
+  const search = searchParams.toString();
   const [grade, setGrade] = useState("firstGrade");
   const [lineOpen, setLineOpen] = useState(false);
   const [lineValue, setLineValue] = useState("");
-  const { search } = useLocation();
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const {
+    data: departments = [],
+    isPending: departmentsPending,
+    isError: departmentsError,
+  } = useQuery(getDepartmentOptions());
 
-  // Reads the selected city/team from URL, e.g. /team/soknad?city=trondheim&team=it
-  const searchParams = new URLSearchParams(search);
-  const selectedCity = normalizeSelection(
-    searchParams.get("city"),
-    "trondheim",
+  const {
+    data: teamOverviews = [],
+    isFetching: teamsFetching,
+    isError: teamsError,
+    isFetched: teamsFetched,
+  } = useQuery(getTeamOptions());
+
+  const availableTeams = teamOverviews.filter(
+    ({ team }) =>
+      team.departmentId === Number(selectedDepartmentId) &&
+      team.name !== "Hovedstyret" &&
+      team.name !== "Styret",
   );
-  const selectedTeam = normalizeSelection(
-    searchParams.get("team"),
-    "profilering",
+
+  useEffect(() => {
+    if (
+      departmentsPending ||
+      departmentsError ||
+      !teamsFetched ||
+      teamsError ||
+      handledSearch.current === search
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(search);
+
+    const department = departments.find(
+      (item) => String(item.id) === params.get("department"),
+    );
+
+    const team = teamOverviews.find(
+      (item) => String(item.team.id) === params.get("team"),
+    )?.team;
+
+    const isValid =
+      department !== undefined &&
+      team !== undefined &&
+      team.departmentId === department.id &&
+      team.name !== "Hovedstyret" &&
+      team.name !== "Styret" &&
+      team.acceptApplication &&
+      team.deadline !== null &&
+      new Date(team.deadline).getTime() >= Date.now();
+
+    handledSearch.current = search;
+
+    if (isValid && department && team) {
+      setSelectedDepartmentId(String(department.id));
+      setSelectedTeamId(String(team.id));
+    } else {
+      setSelectedDepartmentId("");
+      setSelectedTeamId("");
+    }
+  }, [
+    search,
+    departments,
+    departmentsPending,
+    departmentsError,
+    teamOverviews,
+    teamsFetched,
+    teamsError,
+  ]);
+
+  const teamsLoading = teamsFetching && teamOverviews.length === 0;
+
+  const selectedDepartment = departments.find(
+    (department) => String(department.id) === selectedDepartmentId,
   );
-  const selectedCityLabel =
-    cityLabels[selectedCity as keyof typeof cityLabels] ?? selectedCity;
-  const selectedTeamLabel = formatTeamLabel(selectedTeam);
-  const isApplicationOpen =
-    applicationOpenByCityAndTeam[selectedCity]?.[selectedTeam] ?? false;
+
+  const overviewUrl = selectedDepartment
+    ? href("/team/:department", {
+        department: selectedDepartment.slug,
+      })
+    : href("/team");
 
   return (
     <section className="mx-auto mb-20 w-full max-w-5xl px-4">
-      <h2 className="text-center font-bold text-3xl text-vektor-DARKblue md:text-4xl">
-        {"Søk team-verv"}
-      </h2>
-      <p className="mx-auto mt-4 max-w-2xl text-center text-md md:text-lg">
-        {
-          "Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet."
-        }
-      </p>
-      <p className="mx-auto mt-2 max-w-2xl text-center text-slate-700 text-sm md:text-base">
-        {`Valgt avdeling: ${selectedCityLabel} • Valgt team: ${selectedTeamLabel}`}
-      </p>
+      <div className="mb-4 flex justify-center md:justify-start">
+        <Link
+          to={overviewUrl}
+          preventScrollReset
+          className="inline-flex items-center gap-2 rounded-md px-2 py-2 font-medium text-sm text-vektor-darkblue transition-colors hover:text-vektor-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue dark:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Tilbake til teamoversikten
+        </Link>
+      </div>
+      <div className="mx-[clamp(1rem,4vw,3rem)] mt-8 overflow-hidden rounded-lg bg-vektor-darkblue text-white shadow-[0_20px_55px_-24px_rgba(2,35,70,0.7)]">
+        <div className="h-2 bg-vektor-blue" aria-hidden="true" />
+        <header className="space-y-3 px-5 pt-8 text-center sm:px-8 sm:pt-10">
+          <p className="font-semibold text-sm text-vektor-blue uppercase tracking-[0.16em]">
+            Ny søknad
+          </p>
+          <h2 className="font-bold text-2xl text-white md:text-3xl">
+            Søk team-verv
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm text-white/80 sm:text-base">
+            Fyll ut skjemaet under for å søke om å bli med i et team i
+            Vektorprogrammet!
+          </p>
+        </header>
 
-      {isApplicationOpen ? (
-        <form className="mx-[clamp(1rem,4vw,3rem)] mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="space-y-5 px-5 pt-6 pb-8 sm:px-8"
+        >
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="department">Avdeling</Label>
+              <Select
+                name="department"
+                value={selectedDepartmentId}
+                onValueChange={(departmentId) => {
+                  if (!departmentId || departmentId === selectedDepartmentId) {
+                    return;
+                  }
+
+                  handledSearch.current = search;
+                  setSelectedDepartmentId(departmentId);
+                  setSelectedTeamId("");
+                }}
+                disabled={departmentsPending || departmentsError}
+                required
+              >
+                <SelectTrigger
+                  id="department"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                >
+                  <SelectValue
+                    placeholder={
+                      departmentsPending
+                        ? "Henter avdelinger ..."
+                        : "Velg avdeling"
+                    }
+                  />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  {departments.map((department) => (
+                    <SelectItem
+                      key={department.id}
+                      value={String(department.id)}
+                    >
+                      {department.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {departmentsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente avdelingene. Prøv igjen senere.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="team">Team</Label>
+              <Select
+                name="team"
+                value={selectedTeamId}
+                onValueChange={(teamId) => {
+                  if (teamId) {
+                    setSelectedTeamId(teamId);
+                  }
+                }}
+                disabled={!selectedDepartmentId || teamsLoading || teamsError}
+                required
+              >
+                <SelectTrigger
+                  id="team"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                >
+                  <SelectValue
+                    placeholder={
+                      selectedDepartmentId
+                        ? teamsLoading
+                          ? "Henter team ..."
+                          : "Velg team"
+                        : "Velg avdeling først"
+                    }
+                  />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  {availableTeams.map(({ team }) => {
+                    const deadline = team.deadline
+                      ? new Date(team.deadline)
+                      : null;
+
+                    const isOpen =
+                      team.acceptApplication &&
+                      deadline !== null &&
+                      deadline.getTime() >= Date.now();
+
+                    const deadlineLabel = deadline?.toLocaleDateString(
+                      "nb-NO",
+                      {
+                        day: "numeric",
+                        month: "long",
+                      },
+                    );
+
+                    return (
+                      <SelectItem
+                        key={team.id}
+                        value={String(team.id)}
+                        disabled={!isOpen}
+                      >
+                        {team.name} —{" "}
+                        {isOpen ? `frist ${deadlineLabel}` : "opptak stengt"}
+                      </SelectItem>
+                    );
+                  })}{" "}
+                </SelectContent>
+              </Select>
+
+              {teamsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente teamene. Prøv igjen senere.
+                </p>
+              )}
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fornavn">{"Fornavn"}</Label>
@@ -153,11 +295,17 @@ export default function TeamApplicationPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-end gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="email">{"Email"}</Label>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <Label htmlFor="email">{"E-post"}</Label>
+                <span id="email-hint" className="text-white/80 text-xs">
+                  Helst ikke bruk en skole e-post
+                </span>
+              </div>
               <Input
                 id="email"
+                aria-describedby="email-hint"
                 name="email"
                 type="email"
                 placeholder="navn@eksempel.no"
@@ -182,6 +330,23 @@ export default function TeamApplicationPage() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="gender">Kjønn</Label>
+            <Select name="gender">
+              <SelectTrigger
+                id="gender"
+                className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+              >
+                <SelectValue placeholder="Velg kjønn" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Mann</SelectItem>
+                <SelectItem value="female">Kvinne</SelectItem>
+                <SelectItem value="other">Annet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="grade">{"Årstrinn"}</Label>
             <input type="hidden" name="grade" value={grade} />
             <Select defaultValue={grade} onValueChange={setGrade}>
@@ -189,11 +354,14 @@ export default function TeamApplicationPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="firstGrade">{"1. klasse"}</SelectItem>
-                <SelectItem value="secondGrade">{"2. klasse"}</SelectItem>
-                <SelectItem value="thirdGrade">{"3. klasse"}</SelectItem>
-                <SelectItem value="fourthGrade">{"4. klasse"}</SelectItem>
-                <SelectItem value="fifthGrade">{"5. klasse"}</SelectItem>
+                <SelectItem value="firstGrade">{"1. årstrinn"}</SelectItem>
+                <SelectItem value="secondGrade">{"2. årstrinn"}</SelectItem>
+                <SelectItem value="thirdGrade">{"3. årstrinn"}</SelectItem>
+                <SelectItem value="fourthGrade">{"4. årstrinn"}</SelectItem>
+                <SelectItem value="fifthGrade">{"5. årstrinn"}</SelectItem>
+                <SelectItem value="sixthOrMore">
+                  {"6. årstrinn eller mer"}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -284,19 +452,7 @@ export default function TeamApplicationPage() {
             {"Send"}
           </Button>
         </form>
-      ) : (
-        <div className="mx-[clamp(1rem,4vw,3rem)] mt-8 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-center text-white shadow-lg md:p-8">
-          <h3 className="font-bold text-2xl md:text-3xl">
-            {"Søknadsskjema stengt"}
-          </h3>
-          <p className="mt-3 text-lg">
-            {`Søknad for ${selectedTeamLabel} i ${selectedCityLabel} er stengt akkurat nå.`}
-          </p>
-          <p className="mt-2 text-slate-200">
-            {"Prøv igjen senere eller kontakt teamleder for mer informasjon."}
-          </p>
-        </div>
-      )}
+      </div>
     </section>
   );
 }
