@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
@@ -36,11 +36,13 @@ const studies = studyOptions.map((value) => ({ value, label: value }));
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function TeamApplicationPage() {
   const [searchParams] = useSearchParams();
+  const handledSearch = useRef<string | null>(null);
+  const search = searchParams.toString();
   const [grade, setGrade] = useState("firstGrade");
   const [lineOpen, setLineOpen] = useState(false);
   const [lineValue, setLineValue] = useState("");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState(() => searchParams.get("department") ?? "");
-  const [selectedTeamId, setSelectedTeamId] = useState(() => searchParams.get("team") ?? "");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState("");
   const {
     data: departments = [],
     isPending: departmentsPending,
@@ -51,6 +53,7 @@ export default function TeamApplicationPage() {
     data: teamOverviews = [],
     isFetching: teamsFetching,
     isError: teamsError,
+    isFetched: teamsFetched,
   } = useQuery(getTeamOptions());
 
   const availableTeams = teamOverviews.filter(
@@ -59,6 +62,56 @@ export default function TeamApplicationPage() {
       team.name !== "Hovedstyret" &&
       team.name !== "Styret",
   );
+
+  useEffect(() => {
+    if (
+      departmentsPending ||
+      departmentsError ||
+      !teamsFetched ||
+      teamsError ||
+      handledSearch.current === search
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(search);
+
+    const department = departments.find(
+      (item) => String(item.id) === params.get("department"),
+    );
+
+    const team = teamOverviews.find(
+      (item) => String(item.team.id) === params.get("team"),
+    )?.team;
+
+    const isValid =
+      department !== undefined &&
+      team !== undefined &&
+      team.departmentId === department.id &&
+      team.name !== "Hovedstyret" &&
+      team.name !== "Styret" &&
+      team.acceptApplication &&
+      team.deadline !== null &&
+      new Date(team.deadline).getTime() >= Date.now();
+
+    handledSearch.current = search;
+
+    if (isValid && department && team) {
+      setSelectedDepartmentId(String(department.id));
+      setSelectedTeamId(String(team.id));
+    } else {
+      setSelectedDepartmentId("");
+      setSelectedTeamId("");
+    }
+  }, [
+    search,
+    departments,
+    departmentsPending,
+    departmentsError,
+    teamOverviews,
+    teamsFetched,
+    teamsError,
+  ]);
 
   const teamsLoading = teamsFetching && teamOverviews.length === 0;
 
@@ -83,6 +136,11 @@ export default function TeamApplicationPage() {
               name="department"
               value={selectedDepartmentId}
               onValueChange={(departmentId) => {
+                if (!departmentId || departmentId === selectedDepartmentId) {
+                  return;
+                }
+
+                handledSearch.current = search;
                 setSelectedDepartmentId(departmentId);
                 setSelectedTeamId("");
               }}
@@ -126,7 +184,11 @@ export default function TeamApplicationPage() {
             <Select
               name="team"
               value={selectedTeamId}
-              onValueChange={setSelectedTeamId}
+              onValueChange={(teamId) => {
+                if (teamId) {
+                  setSelectedTeamId(teamId);
+                }
+              }}
               disabled={!selectedDepartmentId || teamsLoading || teamsError}
               required
             >
