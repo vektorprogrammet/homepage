@@ -215,7 +215,7 @@ function Division({
     team: String(teamId),
   });
 
-  const applicationUrl = `${href("/team/soknad")}?${applicationParams.toString()}`
+  const applicationUrl = `${href("/team/soknad")}?${applicationParams.toString()}`;
 
   return (
     <div

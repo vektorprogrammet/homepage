@@ -10,7 +10,7 @@ import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import { Divider } from "~/components/divider";
 
-import { href, Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, href, useLocation } from "react-router";
 
 type TeamPageInfo = {
   title: string;
@@ -61,7 +61,7 @@ export default function Team() {
   const regionCount =
     !isPending && !isError
       ? departments.filter((department) => department.slug !== "hovedstyret")
-        .length
+          .length
       : undefined;
   const teamCount =
     teamsFetched && !teamsError ? teamOverviews.length : undefined;

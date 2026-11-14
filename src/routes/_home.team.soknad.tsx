@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { href, Link, useSearchParams } from "react-router";
+import { Link, href, useSearchParams } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import { Button } from "~/components/ui/button";
@@ -121,8 +121,8 @@ export default function TeamApplicationPage() {
 
   const overviewUrl = selectedDepartment
     ? href("/team/:department", {
-      department: selectedDepartment.slug,
-    })
+        department: selectedDepartment.slug,
+      })
     : href("/team");
 
   return (
@@ -147,13 +147,15 @@ export default function TeamApplicationPage() {
             Søk team-verv
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-white/80 sm:text-base">
-            Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet!
+            Fyll ut skjemaet under for å søke om å bli med i et team i
+            Vektorprogrammet!
           </p>
         </header>
 
         <form
           onSubmit={(event) => event.preventDefault()}
-          className="space-y-5 px-5 pt-6 pb-8 sm:px-8">
+          className="space-y-5 px-5 pt-6 pb-8 sm:px-8"
+        >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="department">Avdeling</Label>
@@ -357,7 +359,9 @@ export default function TeamApplicationPage() {
                 <SelectItem value="thirdGrade">{"3. årstrinn"}</SelectItem>
                 <SelectItem value="fourthGrade">{"4. årstrinn"}</SelectItem>
                 <SelectItem value="fifthGrade">{"5. årstrinn"}</SelectItem>
-                <SelectItem value="sixthOrMore">{"6. årstrinn eller mer"}</SelectItem>
+                <SelectItem value="sixthOrMore">
+                  {"6. årstrinn eller mer"}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
