@@ -164,7 +164,7 @@ function TeamTab({
           text={overview.team.shortDescription}
           mail={overview.team.email}
           numberOfMembers={overview.memberCount}
-          buttonName="Les mer"
+          deadline={overview.team.deadline}
           url={href("/team/:department/:team", {
             department: departmentSlug,
             team: (overview.team.name === "Økonomi" ? "okonomi" : overview.team.name).toLowerCase(),
@@ -181,25 +181,31 @@ function Division({
   title,
   text,
   numberOfMembers,
-  buttonName,
+  deadline,
   url,
 }: {
   title: string;
   text: string;
   mail: string;
   numberOfMembers: number;
-  buttonName: string;
+  deadline: string | null;
   url: To;
 }) {
+  const showApplyButton = deadline != null && Date.now() <= new Date(deadline).getTime();
+
   return (
-    <NavLink
+    <div
       className={
-        "flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue sm:h-48 shadow-md dark:bg-gray-600 dark:text-white transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+        "flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue sm:h-48 shadow-md dark:bg-gray-600 dark:text-white transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none relative"
       }
-      to={url}
-      preventScrollReset
-      prefetch="intent"
     >
+      <NavLink
+        to={url}
+        preventScrollReset
+        prefetch="intent"
+        aria-label={`Les mer om ${title}`}
+        className="absolute inset-0 z-10 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2"
+      />
       <div className="flex h-48 flex-col justify-between sm:h-full">
         <div className="h-20 content-center rounded-t-md bg-vektor-blue dark:bg-vektor-darblue">
           <h3 className="text-center font-medium text-lg text-vektor-darblue dark:text-white">
@@ -209,28 +215,28 @@ function Division({
         <div className="mx-3 my-2 h-full text-sm">
           <p>{text}</p>
         </div>
-        <div className="mx-3 mb-3 flex items-center justify-between gap-2 sm:mx-0 sm:mb-0 sm:block">
-          <div className="flex flex-row content-end gap-1 text-sm sm:mx-3">
-            <Users className="h-5 w-5 text-black" />
+        <div className="mx-3 mb-3 flex min-h-8 items-center justify-between gap-2">
+          <div className="flex items-center gap-1 text-sm">
+            <Users className="h-5 w-5 shrink-0 text-black" />
             <span>{`${numberOfMembers} medlemmer`}</span>
           </div>
-          <div className="flex shrink-0 justify-end sm:mr-1.5 sm:mb-1.5 sm:w-full sm:self-end">
+
+          {showApplyButton && (
             <Button
-              className="overflow-clip rounded-full"
+              className="relative z-20 shrink-0 rounded-full"
               size="sm"
               variant="green"
               asChild
             >
-              <Link to={url} prefetch="intent">
-                {buttonName}
+              <Link to={href("/team/soknad")}>
+                Søk nå!
               </Link>
             </Button>
-          </div>
-        </div>
-      </div>
+          )}
+        </div>      </div>
       <div className="shrink-0 rounded-b-md bg-vektor-blue px-3 py-2 text-center text-sm sm:hidden dark:bg-vektor-darkblue dark:text-white">
         Les mer om teamet →
       </div>
-    </NavLink>
+    </div>
   );
 }
