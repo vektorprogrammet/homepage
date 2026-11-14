@@ -63,6 +63,7 @@ export function TeamTabs({
     >
       <div className="md:absolute md:left-3 lg:left-auto lg:right-full lg:mr-8">
         <TabMenu
+          className="w-64"
           tabs={[...departments.map((department) => department.city), "Hovedstyret"]}
           activeTab={activeTab}
           setActiveTab={(city) => {
