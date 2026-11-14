@@ -25,15 +25,15 @@ type TeamPageInfo = {
 };
 
 function getTeam(regionCount?: number, teamCount?: number): TeamPageInfo {
-  const regions = regionCount === undefined
-    ? "norske byer"
-    : `${regionCount} norske ${regionCount === 1 ? "by" : "byer"}`;
+  const regions =
+    regionCount === undefined
+      ? "norske byer"
+      : `${regionCount} norske ${regionCount === 1 ? "by" : "byer"}`;
   const teams = teamCount === undefined ? "team" : `${teamCount} team`;
 
   return {
     title: "Styre og team",
-    text1:
-      `Vektorprogrammet er en stor organisasjon med assistenter i ${regions}. Vi trenger derfor mange frivillige bak kulissene som kan få hjulene til å gå rundt. Uten Vektorprogrammets ${teams} hadde dette aldri gått an! `,
+    text1: `Vektorprogrammet er en stor organisasjon med assistenter i ${regions}. Vi trenger derfor mange frivillige bak kulissene som kan få hjulene til å gå rundt. Uten Vektorprogrammets ${teams} hadde dette aldri gått an! `,
     text2: "Kunne du tenkt deg et team-verv hos oss?",
     text3: "Les mer om de ulike teamene nedenfor!",
     image: {
@@ -58,12 +58,13 @@ export default function Team() {
     isError: teamsError,
   } = useQuery(getTeamOptions());
 
-  const regionCount = !isPending && !isError
-    ? departments.filter((department) => department.slug !== "hovedstyret").length
-    : undefined;
-  const teamCount = teamsFetched && !teamsError
-    ? teamOverviews.length
-    : undefined;
+  const regionCount =
+    !isPending && !isError
+      ? departments.filter((department) => department.slug !== "hovedstyret")
+          .length
+      : undefined;
+  const teamCount =
+    teamsFetched && !teamsError ? teamOverviews.length : undefined;
   const teamInfo = getTeam(regionCount, teamCount);
 
   let regionsAnswer: string;

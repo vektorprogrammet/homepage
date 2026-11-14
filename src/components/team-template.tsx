@@ -25,9 +25,10 @@ export function TeamTemplate({
     return <p>Kunne ikke hente teammedlemmer.</p>;
   }
 
-  const overviewUrl = team === "hovedstyret"
-    ? `${href("/team")}?department=hovedstyret`
-    : href("/team/:department", { department });
+  const overviewUrl =
+    team === "hovedstyret"
+      ? `${href("/team")}?department=hovedstyret`
+      : href("/team/:department", { department });
 
   return (
     <div className="w-full min-w-0 [overflow-wrap:anywhere]">
@@ -35,7 +36,7 @@ export function TeamTemplate({
         <Link
           to={overviewUrl}
           preventScrollReset
-          className="inline-flex items-center justify-self-center md:justify-self-start gap-2 rounded-md px-2 py-2 font-medium text-sm text-vektor-darkblue transition-colors hover:text-vektor-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue dark:text-white"
+          className="inline-flex items-center gap-2 justify-self-center rounded-md px-2 py-2 font-medium text-sm text-vektor-darkblue transition-colors hover:text-vektor-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue md:justify-self-start dark:text-white"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
           Tilbake til oversikten

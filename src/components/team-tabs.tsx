@@ -38,11 +38,7 @@ export function TeamTabs({
   }
 
   if (isError) {
-    return (
-      <p role="alert">
-        Kunne ikke hente avdelingene. Prøv igjen senere.
-      </p>
-    );
+    return <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>;
   }
 
   const isHovedstyret = departmentSlug === "hovedstyret";
@@ -54,25 +50,34 @@ export function TeamTabs({
     return <p>Fant ikke avdelingen.</p>;
   }
 
-  const activeTab = isHovedstyret ? "Hovedstyret" : selectedDepartment?.city ?? "";
+  const activeTab = isHovedstyret
+    ? "Hovedstyret"
+    : (selectedDepartment?.city ?? "");
 
   return (
     <div
       className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row lg:relative lg:w-[544px] xl:w-[832px]"
       role="tablist"
     >
-      <div className="md:absolute md:left-3 lg:left-auto lg:right-full lg:mr-8">
+      <div className="md:absolute md:left-3 lg:right-full lg:left-auto lg:mr-8">
         <TabMenu
           className="w-64"
-          tabs={[...departments.map((department) => department.city), "Hovedstyret"]}
+          tabs={[
+            ...departments.map((department) => department.city),
+            "Hovedstyret",
+          ]}
           activeTab={activeTab}
           setActiveTab={(city) => {
             if (city === "Hovedstyret") {
-              navigate(`${href("/team")}?department=hovedstyret`, { preventScrollReset: true });
+              navigate(`${href("/team")}?department=hovedstyret`, {
+                preventScrollReset: true,
+              });
               return;
             }
 
-            const selected = departments.find((department) => department.city === city);
+            const selected = departments.find(
+              (department) => department.city === city,
+            );
             if (selected) {
               navigate(
                 href("/team/:department", { department: selected.slug }),
@@ -89,15 +94,17 @@ export function TeamTabs({
               (overview) => overview.team.name === "Hovedstyret",
             )}
           />
-        ) : selectedDepartment && (
-          <TeamTab
-            departmentSlug={selectedDepartment.slug}
-            overviews={teamOverviews.filter(
-              (overview) =>
-                overview.team.departmentId === selectedDepartment.id &&
-                overview.team.name !== "Hovedstyret",
-            )}
-          />
+        ) : (
+          selectedDepartment && (
+            <TeamTab
+              departmentSlug={selectedDepartment.slug}
+              overviews={teamOverviews.filter(
+                (overview) =>
+                  overview.team.departmentId === selectedDepartment.id &&
+                  overview.team.name !== "Hovedstyret",
+              )}
+            />
+          )
         )}
       </div>
     </div>
@@ -167,7 +174,10 @@ function TeamTab({
           deadline={overview.team.deadline}
           url={href("/team/:department/:team", {
             department: departmentSlug,
-            team: (overview.team.name === "Økonomi" ? "okonomi" : overview.team.name).toLowerCase(),
+            team: (overview.team.name === "Økonomi"
+              ? "okonomi"
+              : overview.team.name
+            ).toLowerCase(),
           })}
         />
       ))}
@@ -191,12 +201,13 @@ function Division({
   deadline: string | null;
   url: To;
 }) {
-  const showApplyButton = deadline != null && Date.now() <= new Date(deadline).getTime();
+  const showApplyButton =
+    deadline != null && Date.now() <= new Date(deadline).getTime();
 
   return (
     <div
       className={
-        "flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue sm:h-48 shadow-md dark:bg-gray-600 dark:text-white transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none relative"
+        "hover:-translate-y-1 focus-visible:-translate-y-1 relative flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue shadow-md transition duration-200 ease-out hover:shadow-lg focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none sm:h-48 dark:bg-gray-600 dark:text-white"
       }
     >
       <NavLink
@@ -228,12 +239,11 @@ function Division({
               variant="green"
               asChild
             >
-              <Link to={href("/team/soknad")}>
-                Søk nå!
-              </Link>
+              <Link to={href("/team/soknad")}>Søk nå!</Link>
             </Button>
           )}
-        </div>      </div>
+        </div>{" "}
+      </div>
       <div className="shrink-0 rounded-b-md bg-vektor-blue px-3 py-2 text-center text-sm sm:hidden dark:bg-vektor-darkblue dark:text-white">
         Les mer om teamet →
       </div>
