@@ -137,289 +137,301 @@ export default function TeamApplicationPage() {
           Tilbake til teamoversikten
         </Link>
       </div>
-      <h2 className="text-center font-bold text-3xl text-vektor-DARKblue md:text-4xl">
-        {"Søk team-verv"}
-      </h2>
-      <p className="mx-auto mt-4 max-w-2xl text-center text-md md:text-lg">
-        {
-          "Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet!"
-        }
-      </p>
+      <div className="mx-[clamp(1rem,4vw,3rem)] mt-8 overflow-hidden rounded-lg bg-vektor-darkblue text-white shadow-[0_20px_55px_-24px_rgba(2,35,70,0.7)]">
+        <div className="h-2 bg-vektor-blue" aria-hidden="true" />
+        <header className="space-y-3 px-5 pt-8 text-center sm:px-8 sm:pt-10">
+          <p className="font-semibold text-sm text-vektor-blue uppercase tracking-[0.16em]">
+            Ny søknad
+          </p>
+          <h2 className="font-bold text-2xl text-white md:text-3xl">
+            Søk team-verv
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm text-white/80 sm:text-base">
+            Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet!
+          </p>
+        </header>
 
-      <form
-        onSubmit={(event) => event.preventDefault()}
-        className="mx-[clamp(1rem,4vw,3rem)] mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="department">Avdeling</Label>
-            <Select
-              name="department"
-              value={selectedDepartmentId}
-              onValueChange={(departmentId) => {
-                if (!departmentId || departmentId === selectedDepartmentId) {
-                  return;
-                }
-
-                handledSearch.current = search;
-                setSelectedDepartmentId(departmentId);
-                setSelectedTeamId("");
-              }}
-              disabled={departmentsPending || departmentsError}
-              required
-            >
-              <SelectTrigger
-                id="department"
-                className="w-full bg-white text-black data-[placeholder]:text-gray-500"
-              >
-                <SelectValue
-                  placeholder={
-                    departmentsPending
-                      ? "Henter avdelinger ..."
-                      : "Velg avdeling"
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="space-y-5 px-5 pt-6 pb-8 sm:px-8">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="department">Avdeling</Label>
+              <Select
+                name="department"
+                value={selectedDepartmentId}
+                onValueChange={(departmentId) => {
+                  if (!departmentId || departmentId === selectedDepartmentId) {
+                    return;
                   }
-                />
-              </SelectTrigger>
 
-              <SelectContent className="bg-white text-vektor-darkblue">
-                {departments.map((department) => (
-                  <SelectItem
-                    key={department.id}
-                    value={String(department.id)}
-                  >
-                    {department.city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {departmentsError && (
-              <p role="alert" className="text-sm">
-                Kunne ikke hente avdelingene. Prøv igjen senere.
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="team">Team</Label>
-            <Select
-              name="team"
-              value={selectedTeamId}
-              onValueChange={(teamId) => {
-                if (teamId) {
-                  setSelectedTeamId(teamId);
-                }
-              }}
-              disabled={!selectedDepartmentId || teamsLoading || teamsError}
-              required
-            >
-              <SelectTrigger
-                id="team"
-                className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                  handledSearch.current = search;
+                  setSelectedDepartmentId(departmentId);
+                  setSelectedTeamId("");
+                }}
+                disabled={departmentsPending || departmentsError}
+                required
               >
-                <SelectValue
-                  placeholder={
-                    selectedDepartmentId
-                      ? teamsLoading
-                        ? "Henter team ..."
-                        : "Velg team"
-                      : "Velg avdeling først"
-                  }
-                />
-              </SelectTrigger>
+                <SelectTrigger
+                  id="department"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                >
+                  <SelectValue
+                    placeholder={
+                      departmentsPending
+                        ? "Henter avdelinger ..."
+                        : "Velg avdeling"
+                    }
+                  />
+                </SelectTrigger>
 
-              <SelectContent className="bg-white text-vektor-darkblue">
-                {availableTeams.map(({ team }) => {
-                  const deadline = team.deadline
-                    ? new Date(team.deadline)
-                    : null;
-
-                  const isOpen =
-                    team.acceptApplication &&
-                    deadline !== null &&
-                    deadline.getTime() >= Date.now();
-
-                  const deadlineLabel = deadline?.toLocaleDateString(
-                    "nb-NO",
-                    {
-                      day: "numeric",
-                      month: "long",
-                    },
-                  );
-
-                  return (
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  {departments.map((department) => (
                     <SelectItem
-                      key={team.id}
-                      value={String(team.id)}
-                      disabled={!isOpen}
+                      key={department.id}
+                      value={String(department.id)}
                     >
-                      {team.name} —{" "}
-                      {isOpen ? `frist ${deadlineLabel}` : "opptak stengt"}
+                      {department.city}
                     </SelectItem>
-                  );
-                })}{" "}
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {departmentsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente avdelingene. Prøv igjen senere.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="team">Team</Label>
+              <Select
+                name="team"
+                value={selectedTeamId}
+                onValueChange={(teamId) => {
+                  if (teamId) {
+                    setSelectedTeamId(teamId);
+                  }
+                }}
+                disabled={!selectedDepartmentId || teamsLoading || teamsError}
+                required
+              >
+                <SelectTrigger
+                  id="team"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                >
+                  <SelectValue
+                    placeholder={
+                      selectedDepartmentId
+                        ? teamsLoading
+                          ? "Henter team ..."
+                          : "Velg team"
+                        : "Velg avdeling først"
+                    }
+                  />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  {availableTeams.map(({ team }) => {
+                    const deadline = team.deadline
+                      ? new Date(team.deadline)
+                      : null;
+
+                    const isOpen =
+                      team.acceptApplication &&
+                      deadline !== null &&
+                      deadline.getTime() >= Date.now();
+
+                    const deadlineLabel = deadline?.toLocaleDateString(
+                      "nb-NO",
+                      {
+                        day: "numeric",
+                        month: "long",
+                      },
+                    );
+
+                    return (
+                      <SelectItem
+                        key={team.id}
+                        value={String(team.id)}
+                        disabled={!isOpen}
+                      >
+                        {team.name} —{" "}
+                        {isOpen ? `frist ${deadlineLabel}` : "opptak stengt"}
+                      </SelectItem>
+                    );
+                  })}{" "}
+                </SelectContent>
+              </Select>
+
+              {teamsError && (
+                <p role="alert" className="text-sm">
+                  Kunne ikke hente teamene. Prøv igjen senere.
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="fornavn">{"Fornavn"}</Label>
+              <Input
+                id="fornavn"
+                name="fornavn"
+                placeholder="Ola"
+                className="text-black"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="etternavn">{"Etternavn"}</Label>
+              <Input
+                id="etternavn"
+                name="etternavn"
+                placeholder="Nordmann"
+                className="text-black"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <Label htmlFor="email">{"E-post"}</Label>
+                <span id="email-hint" className="text-white/80 text-xs">
+                  Helst ikke bruk en skole e-post
+                </span>
+              </div>
+              <Input
+                id="email"
+                aria-describedby="email-hint"
+                name="email"
+                type="email"
+                placeholder="navn@eksempel.no"
+                className="text-black"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">{"Telefon"}</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="Skriv inn telefonnummer"
+                className="text-black"
+                maxLength={8}
+                onChange={(e) => {
+                  const cleanedValue = e.target.value.replaceAll(/\D/g, "");
+                  e.target.value = cleanedValue;
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="grade">{"Årstrinn"}</Label>
+            <input type="hidden" name="grade" value={grade} />
+            <Select defaultValue={grade} onValueChange={setGrade}>
+              <SelectTrigger id="grade" className="w-full text-black">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="firstGrade">{"1. årstrinn"}</SelectItem>
+                <SelectItem value="secondGrade">{"2. årstrinn"}</SelectItem>
+                <SelectItem value="thirdGrade">{"3. årstrinn"}</SelectItem>
+                <SelectItem value="fourthGrade">{"4. årstrinn"}</SelectItem>
+                <SelectItem value="fifthGrade">{"5. årstrinn"}</SelectItem>
+                <SelectItem value="sixthOrMore">{"6. årstrinn eller mer"}</SelectItem>
               </SelectContent>
             </Select>
-
-            {teamsError && (
-              <p role="alert" className="text-sm">
-                Kunne ikke hente teamene. Prøv igjen senere.
-              </p>
-            )}
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
           <div className="space-y-2">
-            <Label htmlFor="fornavn">{"Fornavn"}</Label>
-            <Input
-              id="fornavn"
-              name="fornavn"
-              placeholder="Ola"
+            <Label htmlFor="line">{"Linje"}</Label>
+            <input type="hidden" name="line" value={lineValue} />
+            <Popover open={lineOpen} onOpenChange={setLineOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  aria-expanded={lineOpen}
+                  className="w-full justify-between border-gray-300 bg-white text-left font-normal text-black hover:bg-gray-100"
+                >
+                  {lineValue
+                    ? studies.find((study) => study.value === lineValue)?.label
+                    : "Velg studieretning"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Finn studiekode"
+                    className="text-black"
+                  />
+                  <CommandList>
+                    <CommandEmpty>{"Studiekode ikke funnet."}</CommandEmpty>
+                    <CommandGroup>
+                      {studies.map((study) => (
+                        <CommandItem
+                          key={study.value}
+                          value={study.value}
+                          onSelect={(currentValue) => {
+                            setLineValue(
+                              currentValue === lineValue ? "" : currentValue,
+                            );
+                            setLineOpen(false);
+                          }}
+                        >
+                          {study.label}
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              lineValue === study.value
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="aboutYourself">{"Skriv litt om deg selv"}</Label>
+            <Textarea
+              id="aboutYourself"
+              name="aboutYourself"
+              placeholder="Fortell litt om bakgrunnen din og hva du liker å jobbe med."
+              rows={6}
               className="text-black"
             />
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="etternavn">{"Etternavn"}</Label>
-            <Input
-              id="etternavn"
-              name="etternavn"
-              placeholder="Nordmann"
+            <Label htmlFor="motivation">
+              {"Skriv kort om din motivasjon for vervet"}
+            </Label>
+            <Textarea
+              id="motivation"
+              name="motivation"
+              placeholder="Hvorfor ønsker du dette vervet?"
+              rows={6}
               className="text-black"
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="email">{"Email"}</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="navn@eksempel.no"
-              className="text-black"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">{"Telefon"}</Label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              placeholder="Skriv inn telefonnummer"
-              className="text-black"
-              maxLength={8}
-              onChange={(e) => {
-                const cleanedValue = e.target.value.replaceAll(/\D/g, "");
-                e.target.value = cleanedValue;
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="grade">{"Årstrinn"}</Label>
-          <input type="hidden" name="grade" value={grade} />
-          <Select defaultValue={grade} onValueChange={setGrade}>
-            <SelectTrigger id="grade" className="w-full text-black">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="firstGrade">{"1. årstrinn"}</SelectItem>
-              <SelectItem value="secondGrade">{"2. årstrinn"}</SelectItem>
-              <SelectItem value="thirdGrade">{"3. årstrinn"}</SelectItem>
-              <SelectItem value="fourthGrade">{"4. årstrinn"}</SelectItem>
-              <SelectItem value="fifthGrade">{"5. årstrinn"}</SelectItem>
-              <SelectItem value="sixthOrMore">{"6. årstrinn eller mer"}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="line">{"Linje"}</Label>
-          <input type="hidden" name="line" value={lineValue} />
-          <Popover open={lineOpen} onOpenChange={setLineOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                aria-expanded={lineOpen}
-                className="w-full justify-between border-gray-300 bg-white text-left font-normal text-black hover:bg-gray-100"
-              >
-                {lineValue
-                  ? studies.find((study) => study.value === lineValue)?.label
-                  : "Velg studieretning"}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-              <Command>
-                <CommandInput
-                  placeholder="Finn studiekode"
-                  className="text-black"
-                />
-                <CommandList>
-                  <CommandEmpty>{"Studiekode ikke funnet."}</CommandEmpty>
-                  <CommandGroup>
-                    {studies.map((study) => (
-                      <CommandItem
-                        key={study.value}
-                        value={study.value}
-                        onSelect={(currentValue) => {
-                          setLineValue(
-                            currentValue === lineValue ? "" : currentValue,
-                          );
-                          setLineOpen(false);
-                        }}
-                      >
-                        {study.label}
-                        <Check
-                          className={cn(
-                            "ml-auto h-4 w-4",
-                            lineValue === study.value
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="aboutYourself">{"Skriv litt om deg selv"}</Label>
-          <Textarea
-            id="aboutYourself"
-            name="aboutYourself"
-            placeholder="Fortell litt om bakgrunnen din og hva du liker å jobbe med."
-            rows={6}
-            className="text-black"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="motivation">
-            {"Skriv kort om din motivasjon for vervet"}
-          </Label>
-          <Textarea
-            id="motivation"
-            name="motivation"
-            placeholder="Hvorfor ønsker du dette vervet?"
-            rows={6}
-            className="text-black"
-          />
-        </div>
-
-        <Button
-          type="submit"
-          variant="green"
-          className="mt-8 w-full text-base uppercase"
-        >
-          {"Send"}
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            variant="green"
+            className="mt-8 w-full text-base uppercase"
+          >
+            {"Send"}
+          </Button>
+        </form>
+      </div>
     </section>
   );
 }
