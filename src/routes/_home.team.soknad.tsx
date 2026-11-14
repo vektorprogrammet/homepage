@@ -123,15 +123,50 @@ export default function TeamApplicationPage() {
       </h2>
       <p className="mx-auto mt-4 max-w-2xl text-center text-md md:text-lg">
         {
-          "Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet."
+          "Fyll ut skjemaet under for å søke om å bli med i et team i Vektorprogrammet!"
         }
-      </p>
-      <p className="mx-auto mt-2 max-w-2xl text-center text-slate-700 text-sm md:text-base">
-        {`Valgt avdeling: ${selectedCityLabel} • Valgt team: ${selectedTeamLabel}`}
       </p>
 
       {isApplicationOpen ? (
         <form className="mx-[clamp(1rem,4vw,3rem)] mt-8 space-y-5 rounded-xl border border-vektor-darkblue bg-vektor-darkblue p-6 text-white shadow-lg md:p-8">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="department">Avdeling</Label>
+              <Select name="department">
+                <SelectTrigger
+                  id="department"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+                >
+                  <SelectValue placeholder="Velg avdeling" />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  <SelectItem value="empty" disabled>
+                    Ingen avdelinger lagt til ennå
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="team">Team</Label>
+              <Select name="team">
+                <SelectTrigger
+                  id="team"
+                  className="w-full bg-white text-black data-[placeholder]:text-gray-500"
+
+                >
+                  <SelectValue placeholder="Velg team" />
+                </SelectTrigger>
+
+                <SelectContent className="bg-white text-vektor-darkblue">
+                  <SelectItem value="empty" disabled>
+                    Ingen team lagt til ennå
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="fornavn">{"Fornavn"}</Label>
