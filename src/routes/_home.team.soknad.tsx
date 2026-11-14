@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import { Button } from "~/components/ui/button";
@@ -34,11 +35,12 @@ const studies = studyOptions.map((value) => ({ value, label: value }));
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function TeamApplicationPage() {
+  const [searchParams] = useSearchParams();
   const [grade, setGrade] = useState("firstGrade");
   const [lineOpen, setLineOpen] = useState(false);
   const [lineValue, setLineValue] = useState("");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
-  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState(() => searchParams.get("department") ?? "");
+  const [selectedTeamId, setSelectedTeamId] = useState(() => searchParams.get("team") ?? "");
   const {
     data: departments = [],
     isPending: departmentsPending,
