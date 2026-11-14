@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
+import { href, Link, useSearchParams } from "react-router";
 import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import { Button } from "~/components/ui/button";
@@ -115,8 +115,28 @@ export default function TeamApplicationPage() {
 
   const teamsLoading = teamsFetching && teamOverviews.length === 0;
 
+  const selectedDepartment = departments.find(
+    (department) => String(department.id) === selectedDepartmentId,
+  );
+
+  const overviewUrl = selectedDepartment
+    ? href("/team/:department", {
+      department: selectedDepartment.slug,
+    })
+    : href("/team");
+
   return (
     <section className="mx-auto mb-20 w-full max-w-5xl px-4">
+      <div className="mb-4 flex justify-center md:justify-start">
+        <Link
+          to={overviewUrl}
+          preventScrollReset
+          className="inline-flex items-center gap-2 rounded-md px-2 py-2 font-medium text-sm text-vektor-darkblue transition-colors hover:text-vektor-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue dark:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Tilbake til teamoversikten
+        </Link>
+      </div>
       <h2 className="text-center font-bold text-3xl text-vektor-DARKblue md:text-4xl">
         {"Søk team-verv"}
       </h2>
