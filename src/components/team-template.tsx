@@ -30,7 +30,7 @@ export function TeamTemplate({
     : href("/team/:department", { department });
 
   return (
-    <div>
+    <div className="w-full min-w-0 [overflow-wrap:anywhere]">
       <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <Link
           to={overviewUrl}
@@ -40,7 +40,7 @@ export function TeamTemplate({
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
           Tilbake til oversikten
         </Link>
-        <h1 className="break-words text-center font-bold text-4xl text-vektor-darblue md:col-start-2 md:row-start-1">
+        <h1 className="min-w-0 break-words text-center font-bold text-3xl text-vektor-darblue sm:text-4xl md:col-start-2 md:row-start-1">
           {fullTeam.team.name}
         </h1>
       </div>
@@ -56,12 +56,12 @@ export function TeamTemplate({
       <div className="m-3 my-5 text-center font-sans text-vektor-darblue text-xl">
         {fullTeam.team.shortDescription}
       </div>
-      <div className="mt-10 mb-10 flex flex-wrap justify-center gap-x-6 gap-y-8">
+      <div className="mt-10 mb-10 grid grid-cols-2 justify-items-center gap-x-4 gap-y-8 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-6">
         {fullTeam.members.map((member) => {
           const name = `${member.firstName} ${member.lastName}`.trim();
 
           return (
-            <div key={member.id} className="w-40">
+            <div key={member.id} className="w-full min-w-0 max-w-40 sm:w-40">
               <div className="max-w-6xl content-center justify-between">
                 <img
                   alt={`Bilde av ${name}`}
@@ -69,7 +69,7 @@ export function TeamTemplate({
                     member.profilePictureUrl ??
                     "https://vektorprogrammet.no/media/cache/profile_img_small/images/defaultProfile.png"
                   }
-                  className="mx-auto mt-6 mb-2 h-32 rounded-full grayscale"
+                  className="mx-auto mt-6 mb-2 h-32 max-w-full rounded-full object-contain grayscale"
                 />
                 <div className="mt-3 text-center font-bold font-sans text-vektor-darblue">
                   {name}
