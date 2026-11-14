@@ -89,7 +89,7 @@ export default function Team() {
             )}
           </div>
         </div>
-        <div className="relative mt-10">
+        <div className="relative mt-10 hidden lg:block">
           <div className="absolute top-20 w-full overflow-visible">
             {/* biome-ignore lint/a11y/noSvgWithoutTitle: Decorative icon */}
             <svg className="overflow-visible">
