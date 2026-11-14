@@ -1,7 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "~/index.css";
+import { getQueryClient } from "~/lib/query-client";
 import icon from "/images/vektor-logo-circle.svg";
 import logo from "/images/vektor-logo.svg";
 
@@ -48,7 +49,7 @@ export function Layout({
 
 // biome-ignore lint/style/noDefaultExport: Route Modules require default export https://reactrouter.com/start/framework/route-module
 export default function Root() {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(getQueryClient);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -9,7 +9,7 @@ type Team = {
   shortDescription: string;
   acceptApplication: boolean;
   active: boolean;
-  deadline: Date;
+  deadline: string | null;
 };
 
 export type TeamOverview = {

@@ -43,7 +43,7 @@ export function TabMenu<T extends string>({
             </div>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="m-1 w-full rounded-md bg-white shadow-sm">
+        <DropdownMenuContent className="z-50 mt-1 w-[var(--radix-dropdown-menu-trigger-width)] rounded-md bg-white shadow-sm">
           {tabs.map((tab) => {
             const chosenStyle =
               activeTab === tab

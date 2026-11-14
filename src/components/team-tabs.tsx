@@ -1,51 +1,117 @@
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Users } from "lucide-react";
-import { useState } from "react";
-import { Link, NavLink, type To } from "react-router";
+import { useEffect } from "react";
+import { Link, NavLink, type To, href, useNavigate } from "react-router";
+import { getDepartmentOptions } from "~/api/queries/department-queries";
 import { getTeamOptions } from "~/api/queries/team-queries";
 import type { TeamOverview } from "~/api/team";
 import { TabMenu } from "~/components/tab-menu";
 import { Button } from "~/components/ui/button";
-import { type DepartmentPretty, departments } from "~/lib/types";
 
-export function TeamTabs({ department }: { department: DepartmentPretty }) {
-  const [activeTab, setActive] = useState<DepartmentPretty>(department);
+export function TeamTabs({
+  departmentSlug,
+}: {
+  readonly departmentSlug?: string;
+}) {
+  const navigate = useNavigate();
   const { data: teamOverviews } = useQuery(getTeamOptions());
+
+  const {
+    data: departments = [],
+    isPending,
+    isError,
+  } = useQuery(getDepartmentOptions());
+
+  const defaultDepartmentSlug = departments[0]?.slug;
+
+  useEffect(() => {
+    if (!departmentSlug && !isPending && !isError && defaultDepartmentSlug) {
+      navigate(
+        href("/team/:department", { department: defaultDepartmentSlug }),
+        { replace: true, preventScrollReset: true },
+      );
+    }
+  }, [departmentSlug, defaultDepartmentSlug, isPending, isError, navigate]);
+
+  if (isPending) {
+    return <output>Henter avdelinger …</output>;
+  }
+
+  if (isError) {
+    return <p role="alert">Kunne ikke hente avdelingene. Prøv igjen senere.</p>;
+  }
+
+  const isHovedstyret = departmentSlug === "hovedstyret";
+  const selectedDepartment = departmentSlug
+    ? departments.find((department) => department.slug === departmentSlug)
+    : departments[0];
+
+  if (!isHovedstyret && !selectedDepartment) {
+    return <p>Fant ikke avdelingen.</p>;
+  }
+
+  const activeTab = isHovedstyret
+    ? "Hovedstyret"
+    : (selectedDepartment?.city ?? "");
 
   return (
     <div
-      className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row"
+      className="mb-6 flex max-w-[256px] flex-col items-start sm:max-w-[544px] md:mb-auto md:max-w-6xl md:flex-row lg:relative lg:w-[544px] xl:w-[832px]"
       role="tablist"
     >
-      <div className="md:absolute md:left-3 lg:left-12">
+      <div className="md:absolute md:left-3 lg:right-full lg:left-auto lg:mr-8">
         <TabMenu
-          tabs={Object.values(departments)}
+          className="w-64"
+          tabs={[
+            ...departments.map((department) => department.city),
+            "Hovedstyret",
+          ]}
           activeTab={activeTab}
-          setActiveTab={setActive}
+          setActiveTab={(city) => {
+            if (city === "Hovedstyret") {
+              navigate(`${href("/team")}?department=hovedstyret`, {
+                preventScrollReset: true,
+              });
+              return;
+            }
+
+            const selected = departments.find(
+              (department) => department.city === city,
+            );
+            if (selected) {
+              navigate(
+                href("/team/:department", { department: selected.slug }),
+                { preventScrollReset: true },
+              );
+            }
+          }}
         />
       </div>
       <div className="flex w-full max-w-5xl flex-col items-start">
-        {activeTab === "Hovedstyret" ? (
+        {isHovedstyret ? (
           <HovedstyretTab
             overview={teamOverviews.find(
-              (teamOverview) => teamOverview.team.name === "Hovedstyret",
+              (overview) => overview.team.name === "Hovedstyret",
             )}
           />
         ) : (
-          <TeamTab
-            overviews={teamOverviews.filter(
-              (teamOverview) =>
-                teamOverview.departmentCity === activeTab &&
-                teamOverview.team.name !== "Hovedstyret",
-            )}
-          />
+          selectedDepartment && (
+            <TeamTab
+              departmentSlug={selectedDepartment.slug}
+              overviews={teamOverviews.filter(
+                (overview) =>
+                  overview.team.departmentId === selectedDepartment.id &&
+                  overview.team.name !== "Hovedstyret",
+              )}
+            />
+          )
         )}
       </div>
     </div>
   );
 }
 
-function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
+function HovedstyretTab({ overview }: { readonly overview?: TeamOverview }) {
   return (
     <div className="flex flex-col md:ml-24 md:max-w-2xl md:flex-row lg:ml-16 xl:ml-auto">
       <div className="flex-1 object-contain">
@@ -71,7 +137,7 @@ function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
         <br />
         <NavLink
           type="button"
-          to={`/team/${overview?.team.name.toLowerCase()}`}
+          to="/team/hovedstyret"
           className="rounded border border-blue-500 bg-transparent px-4 py-2 font-semibold text-blue-700 transition duration-300 hover:border-transparent hover:bg-blue-500 hover:text-white dark:bg-vektor-darkblue dark:text-white dark:hover:bg-blue-600"
           prefetch="intent"
         >
@@ -89,7 +155,13 @@ function HovedstyretTab({ overview }: { overview?: TeamOverview }) {
   );
 }
 
-function TeamTab({ overviews }: { overviews: Array<TeamOverview> }) {
+function TeamTab({
+  overviews,
+  departmentSlug,
+}: {
+  readonly overviews: Array<TeamOverview>;
+  readonly departmentSlug: string;
+}) {
   return (
     <div className="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {overviews.map((overview) => (
@@ -99,8 +171,14 @@ function TeamTab({ overviews }: { overviews: Array<TeamOverview> }) {
           text={overview.team.shortDescription}
           mail={overview.team.email}
           numberOfMembers={overview.memberCount}
-          buttonName="Les mer"
-          url={`/team/${overview.departmentCity === "Ås" ? "aas" : overview.departmentCity}/${overview.team.name === "Økonomi" ? "okonomi" : overview.team.name}`.toLowerCase()}
+          deadline={overview.team.deadline}
+          url={href("/team/:department/:team", {
+            department: departmentSlug,
+            team: (overview.team.name === "Økonomi"
+              ? "okonomi"
+              : overview.team.name
+            ).toLowerCase(),
+          })}
         />
       ))}
     </div>
@@ -113,48 +191,62 @@ function Division({
   title,
   text,
   numberOfMembers,
-  buttonName,
+  deadline,
   url,
 }: {
   title: string;
   text: string;
   mail: string;
   numberOfMembers: number;
-  buttonName: string;
+  deadline: string | null;
   url: To;
 }) {
+  const showApplyButton =
+    deadline != null && Date.now() <= new Date(deadline).getTime();
+
   return (
-    <NavLink
+    <div
       className={
-        "flex h-48 w-64 flex-col justify-between rounded-md bg-vektor-light-blue shadow-md dark:bg-gray-600 dark:text-white"
+        "hover:-translate-y-1 focus-visible:-translate-y-1 relative flex h-auto w-64 flex-col justify-between rounded-md bg-vektor-light-blue shadow-md transition duration-200 ease-out hover:shadow-lg focus-visible:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none sm:h-48 dark:bg-gray-600 dark:text-white"
       }
-      to={url}
-      prefetch="intent"
     >
-      <div className="h-20 content-center rounded-t-md bg-vektor-blue dark:bg-vektor-darblue">
-        <h3 className="text-center font-medium text-lg text-vektor-darblue dark:text-white">
-          {title}
-        </h3>
+      <NavLink
+        to={url}
+        preventScrollReset
+        prefetch="intent"
+        aria-label={`Les mer om ${title}`}
+        className="absolute inset-0 z-10 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vektor-darkblue focus-visible:ring-offset-2"
+      />
+      <div className="flex h-48 flex-col justify-between sm:h-full">
+        <div className="h-20 content-center rounded-t-md bg-vektor-blue dark:bg-vektor-darblue">
+          <h3 className="text-center font-medium text-lg text-vektor-darblue dark:text-white">
+            {title}
+          </h3>
+        </div>
+        <div className="mx-3 my-2 h-full text-sm">
+          <p>{text}</p>
+        </div>
+        <div className="mx-3 mb-3 flex min-h-8 items-center justify-between gap-2">
+          <div className="flex items-center gap-1 text-sm">
+            <Users className="h-5 w-5 shrink-0 text-black" />
+            <span>{`${numberOfMembers} medlemmer`}</span>
+          </div>
+
+          {showApplyButton && (
+            <Button
+              className="relative z-20 shrink-0 rounded-full"
+              size="sm"
+              variant="green"
+              asChild
+            >
+              <Link to={href("/team/soknad")}>Søk nå!</Link>
+            </Button>
+          )}
+        </div>{" "}
       </div>
-      <div className="mx-3 my-2 h-full text-sm">
-        <p>{text}</p>
+      <div className="shrink-0 rounded-b-md bg-vektor-blue px-3 py-2 text-center text-sm sm:hidden dark:bg-vektor-darkblue dark:text-white">
+        Les mer om teamet →
       </div>
-      <div className="mx-3 flex flex-row content-end gap-1 text-sm">
-        <Users className="h-5 w-5 text-black" />
-        <span>{`${numberOfMembers} medlemmer`}</span>
-      </div>
-      <div className="mr-1.5 mb-1.5 flex w-full justify-end self-end">
-        <Button
-          className="overflow-clip rounded-full"
-          size="sm"
-          variant="green"
-          asChild
-        >
-          <Link to={url} prefetch="intent">
-            {buttonName}
-          </Link>
-        </Button>
-      </div>
-    </NavLink>
+    </div>
   );
 }
